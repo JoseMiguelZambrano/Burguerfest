@@ -1,239 +1,175 @@
-"use client";
+import type { Metadata } from "next";
+import { LandingNavbar } from "@/components/landing/navbar";
+import { HeroCarousel } from "@/components/landing/hero-carousel";
+import { FeaturedRestaurants } from "@/components/landing/featured-restaurants";
+import { Sponsors } from "@/components/landing/sponsors";
+import { CTASection } from "@/components/landing/cta-section";
+import { Footer } from "@/components/landing/footer";
+import { JsonLd } from "@/components/seo/json-ld";
 
-import { useState } from "react";
-import { AdminNavbar } from "@/components/admin/navbar";
-import { RestaurantList, type Restaurant } from "@/components/admin/restaurant-list";
-import { ParticipantList, type Participant } from "@/components/admin/participant-list";
-import { SolicitudesList, type SolicitudRestaurante } from "@/components/admin/solicitudes-list";
-
-// Sample data for restaurants
-const sampleRestaurants: Restaurant[] = [
-  {
-    id: "1",
-    name: "Burger Plaza",
-    address: "Av. Barcelona 123, Barcelona",
-    schedule: "13:00 - 00:00",
-    socialHandle: "@burgerplaza",
-    status: "activo",
-  },
-  {
-    id: "2",
-    name: "La Pizzería",
-    address: "C/ Roma 45, Madrid",
-    schedule: "12:00 - 23:00",
-    socialHandle: "@lapizzeriacntr",
-    status: "revision",
-  },
-  {
-    id: "3",
-    name: "Tacos El Güero",
-    address: "Pl. Mexico s/n, Valencia",
-    schedule: "18:00 - 01:00",
-    socialHandle: "@tacostguero",
-    status: "inactivo",
-  },
-  {
-    id: "4",
-    name: "Sushi Master",
-    address: "C/ Tokio 78, Sevilla",
-    schedule: "12:30 - 23:30",
-    socialHandle: "@sushimaster_es",
-    status: "activo",
-  },
-  {
-    id: "5",
-    name: "El Asador",
-    address: "Av. Carnes 321, Bilbao",
-    schedule: "13:00 - 16:00, 20:00 - 00:00",
-    socialHandle: "@elasadorbilbao",
-    status: "revision",
-  },
-];
-
-// Sample data for participants
-const sampleParticipants: Participant[] = [
-  {
-    id: "1",
-    name: "Carlos Martínez",
-    email: "c.martinez@email.com",
-    participantId: "PM10301",
-    region: "Barcelona",
-    status: "activo",
-  },
-  {
-    id: "2",
-    name: "Elena García",
-    email: "e.garcia@email.com",
-    participantId: "PM10302",
-    region: "Madrid",
-    status: "revision",
-  },
-  {
-    id: "3",
-    name: "Miguel Ruiz",
-    email: "m.ruiz@email.com",
-    participantId: "PM10303",
-    region: "Valencia",
-    status: "inactivo",
-  },
-  {
-    id: "4",
-    name: "Ana López",
-    email: "a.lopez@email.com",
-    participantId: "PM10304",
-    region: "Sevilla",
-    status: "activo",
-  },
-  {
-    id: "5",
-    name: "Pedro Sánchez",
-    email: "p.sanchez@email.com",
-    participantId: "PM10305",
-    region: "Bilbao",
-    status: "activo",
-  },
-];
-
-// Sample data for solicitudes
-const sampleSolicitudes: SolicitudRestaurante[] = [
-  {
-    id: "1",
-    name: "Burger Plaza",
-    type: "restaurante",
-    timestamp: "Hace 10 min",
-    location: "Barcelona",
-    schedule: "13:00-00:00",
-    starDish: "Burger Trufada",
-    socialHandle: "@burgerplaza",
+// SEO Metadata - Server-side rendered
+export const metadata: Metadata = {
+  title: "Burger Fest 2026 - 6ta Edición | Festival Gastronómico de Hamburguesas",
+  description:
+    "Burger Fest es el festival gastronómico más importante dedicado a la cultura de las hamburguesas. Descubre restaurantes destacados, participa como restaurante o patrocinador. 6ta Edición 2026.",
+  keywords: [
+    "Burger Fest",
+    "festival hamburguesas",
+    "festival gastronómico",
+    "hamburguesas gourmet",
+    "restaurantes participantes",
+    "patrocinadores",
+    "comida",
+    "evento gastronómico",
+    "2026",
+  ],
+  authors: [{ name: "Burger Fest Organization" }],
+  creator: "Burger Fest",
+  publisher: "Burger Fest",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: "https://burgerfest.com",
+    siteName: "Burger Fest",
+    title: "Burger Fest 2026 - 6ta Edición | Festival Gastronómico",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+      "El festival gastronómico más importante dedicado a la cultura de las hamburguesas. Participa como restaurante o patrocinador.",
+    images: [
+      {
+        url: "/images/hero-banner.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "Burger Fest 2026 - 6ta Edición",
+      },
+    ],
   },
-  {
-    id: "2",
-    name: "Tacos El Güero",
-    type: "restaurante",
-    timestamp: "Ayer",
-    location: "Valencia",
-    schedule: "18:00-01:00",
-    starDish: "Tacos al Pastor",
-    socialHandle: "@tacostguero",
+  twitter: {
+    card: "summary_large_image",
+    title: "Burger Fest 2026 - 6ta Edición",
     description:
-      "Auténtica comida mexicana con los mejores ingredientes. Nuestros tacos son preparados al momento con recetas tradicionales.",
+      "El festival gastronómico más importante dedicado a la cultura de las hamburguesas.",
+    images: ["/images/hero-banner.jpeg"],
+    creator: "@burgerfest",
   },
-  {
-    id: "3",
-    name: "Logística Express",
-    type: "patrocinador",
-    timestamp: "Hace 2 horas",
-    description:
-      "Empresa líder en logística y distribución de alimentos. Más de 15 años de experiencia en el sector gastronómico.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
-  {
-    id: "4",
-    name: "TecnoFood",
-    type: "patrocinador",
-    timestamp: "Hace 1 día",
-    description:
-      "Soluciones tecnológicas para restaurantes. Software de gestión, TPV y sistemas de pedidos online.",
+  alternates: {
+    canonical: "https://burgerfest.com",
   },
-  {
-    id: "5",
-    name: "La Pizzería",
-    type: "restaurante",
-    timestamp: "Hace 3 días",
-    location: "Madrid",
-    schedule: "12:00-23:00",
-    starDish: "Pizza Napolitana",
-    socialHandle: "@lapizzeria_mad",
-    description:
-      "La mejor pizza artesanal de Madrid. Horno de leña tradicional y masa madre fermentada 48 horas.",
-  },
-  {
-    id: "6",
-    name: "NUEVO PATROCINANTE",
-    type: "patrocinador",
-    timestamp: "Reciente",
-    description: "Nueva solicitud de patrocinio pendiente de revisión.",
-  },
-];
+};
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"solicitudes" | "restaurantes" | "participantes">(
-    "restaurantes"
-  );
+// SSR Data fetching
+async function getEvents() {
+  // In production, this would fetch from a database/API
+  return [
+    {
+      id: "1",
+      title: "Burger Fest 2026 - 6ta Edición",
+      description:
+        "El festival gastronómico más importante dedicado a la cultura de las hamburguesas regresa con su sexta edición. Más de 50 restaurantes participantes.",
+      date: "21 - 30 de Junio, 2026",
+      image: "/images/hero-banner.jpeg",
+    },
+    {
+      id: "2",
+      title: "Concurso de la Mejor Hamburguesa",
+      description:
+        "Los mejores chefs compiten por el título de la mejor hamburguesa del festival. Votación popular y jurado experto.",
+      date: "25 de Junio, 2026",
+      image: "/images/hero-banner.jpeg",
+    },
+    {
+      id: "3",
+      title: "Noche de Food Trucks",
+      description:
+        "Una experiencia única con los mejores food trucks de la región. Música en vivo y ambiente festivo.",
+      date: "28 de Junio, 2026",
+      image: "/images/hero-banner.jpeg",
+    },
+  ];
+}
 
-  const handleDeleteRestaurant = (id: string) => {
-    console.log("Delete restaurant:", id);
-  };
+async function getFeaturedRestaurants() {
+  return [
+    {
+      id: "1",
+      name: "Burger Plaza",
+      location: "Barcelona, España",
+      schedule: "13:00 - 00:00",
+      image: "/images/restaurant-1.jpg",
+      featured: true,
+    },
+    {
+      id: "2",
+      name: "La Parrilla Gourmet",
+      location: "Madrid, España",
+      schedule: "12:00 - 23:00",
+      image: "/images/restaurant-2.jpg",
+      featured: true,
+    },
+    {
+      id: "3",
+      name: "Smash & Co",
+      location: "Valencia, España",
+      schedule: "18:00 - 01:00",
+      image: "/images/restaurant-3.jpg",
+      featured: false,
+    },
+  ];
+}
 
-  const handleViewRestaurantDetails = (id: string) => {
-    console.log("View restaurant details:", id);
-  };
+async function getSponsors() {
+  return [
+    { id: "1", name: "Sponsor Gold 1", logo: "/images/logo-light.jpeg", tier: "gold" as const },
+    { id: "2", name: "Sponsor Gold 2", logo: "/images/logo-light.jpeg", tier: "gold" as const },
+    { id: "3", name: "Sponsor Silver 1", logo: "/images/logo-light.jpeg", tier: "silver" as const },
+    { id: "4", name: "Sponsor Silver 2", logo: "/images/logo-light.jpeg", tier: "silver" as const },
+    { id: "5", name: "Sponsor Silver 3", logo: "/images/logo-light.jpeg", tier: "silver" as const },
+    { id: "6", name: "Sponsor Bronze 1", logo: "/images/logo-light.jpeg", tier: "bronze" as const },
+    { id: "7", name: "Sponsor Bronze 2", logo: "/images/logo-light.jpeg", tier: "bronze" as const },
+  ];
+}
 
-  const handleWhatsApp = (id: string) => {
-    console.log("Contact via WhatsApp:", id);
-  };
-
-  const handleDeleteParticipant = (id: string) => {
-    console.log("Delete participant:", id);
-  };
-
-  const handleViewProfile = (id: string) => {
-    console.log("View profile:", id);
-  };
-
-  const handleEmail = (id: string) => {
-    console.log("Contact via email:", id);
-  };
-
-  const handleAprobar = (id: string) => {
-    console.log("Aprobar solicitud:", id);
-  };
-
-  const handleRechazar = (id: string) => {
-    console.log("Rechazar solicitud:", id);
-  };
+// Server Component - SSR
+export default async function LandingPage() {
+  // Parallel data fetching for optimal performance
+  const [events, restaurants, sponsors] = await Promise.all([
+    getEvents(),
+    getFeaturedRestaurants(),
+    getSponsors(),
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminNavbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <JsonLd />
+      <LandingNavbar />
+      
+      <main id="main-content">
+        {/* Hero Carousel - id for skip link */}
+        <div id="eventos">
+          <HeroCarousel events={events} />
+        </div>
 
-      <main className="w-full px-6 lg:px-8 py-8">
-        {activeTab === "restaurantes" && (
-          <RestaurantList
-            restaurants={sampleRestaurants}
-            onDelete={handleDeleteRestaurant}
-            onViewDetails={handleViewRestaurantDetails}
-            onWhatsApp={handleWhatsApp}
-          />
-        )}
+        {/* CTA Section */}
+        <CTASection />
 
-        {activeTab === "participantes" && (
-          <ParticipantList
-            participants={sampleParticipants}
-            onDelete={handleDeleteParticipant}
-            onViewProfile={handleViewProfile}
-            onEmail={handleEmail}
-          />
-        )}
+        {/* Featured Restaurants */}
+        <FeaturedRestaurants restaurants={restaurants} />
 
-        {activeTab === "solicitudes" && (
-          <SolicitudesList
-            solicitudes={sampleSolicitudes}
-            onAprobar={handleAprobar}
-            onRechazar={handleRechazar}
-          />
-        )}
+        {/* Sponsors */}
+        <Sponsors sponsors={sponsors} />
       </main>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-border bg-card py-6">
-        <div className="px-6 lg:px-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Burger Fest. Todos los derechos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
