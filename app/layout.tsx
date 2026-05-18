@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -6,10 +6,31 @@ import './globals.css'
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#1e3a5f' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
+
 export const metadata: Metadata = {
-  title: 'Burger Fest - Panel de Administración',
-  description: 'Panel administrativo para gestión de restaurantes Burger Fest',
+  metadataBase: new URL('https://burgerfest.com'),
+  title: {
+    default: 'Burger Fest 2026 - Festival Gastronómico de Hamburguesas',
+    template: '%s | Burger Fest 2026',
+  },
+  description: 'Burger Fest es el festival gastronómico más importante dedicado a la cultura de las hamburguesas. Participa como restaurante o patrocinador. 6ta Edición 2026.',
+  applicationName: 'Burger Fest',
   generator: 'v0.app',
+  referrer: 'origin-when-cross-origin',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: [
       {
