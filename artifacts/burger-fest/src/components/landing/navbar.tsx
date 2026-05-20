@@ -1,7 +1,8 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
 
 interface NavItem {
   label: string;
@@ -17,6 +18,9 @@ const navItems: NavItem[] = [
 
 export function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { session, role, signOut } = useAuth();
+  const [, navigate] = useLocation();
+  const handleLogout = async () => { await signOut(); navigate("/"); };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border">
@@ -58,12 +62,25 @@ export function LandingNavbar() {
               ))}
             </ul>
             <div className="flex items-center gap-3">
-              <Button variant="outline" asChild>
-                <Link href="/registro">Registro</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/admin">Login</Link>
-              </Button>
+              {session ? (
+                <>
+                  {role === "admin" && (
+                    <Button variant="outline" asChild>
+                      <Link href="/admin">Admin</Link>
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={handleLogout}>Cerrar sesión</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" asChild>
+                    <Link href="/registro">Registro</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/login">Login</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -103,12 +120,25 @@ export function LandingNavbar() {
               ))}
             </ul>
             <div className="flex flex-col gap-3 mt-6">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/registro">Registro</Link>
-              </Button>
-              <Button className="w-full" asChild>
-                <Link href="/admin">Login</Link>
-              </Button>
+              {session ? (
+                <>
+                  {role === "admin" && (
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/admin">Admin</Link>
+                    </Button>
+                  )}
+                  <Button variant="outline" className="w-full" onClick={handleLogout}>Cerrar sesión</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/registro">Registro</Link>
+                  </Button>
+                  <Button className="w-full" asChild>
+                    <Link href="/login">Login</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

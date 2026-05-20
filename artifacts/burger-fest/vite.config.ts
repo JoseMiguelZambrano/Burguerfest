@@ -26,8 +26,24 @@ if (!basePath) {
   );
 }
 
+// Expose Supabase public credentials to the browser bundle. SUPABASE_URL and
+// SUPABASE_ANON_KEY are safe to embed (anon key is intended for client use,
+// protected by Supabase RLS).
+// Defensively strip an accidental "KEY=" prefix in case the secret value was
+// pasted with the variable name included.
+const stripPrefix = (v: string | undefined, name: string): string => {
+  const raw = (v ?? "").trim();
+  return raw.startsWith(`${name}=`) ? raw.slice(name.length + 1) : raw;
+};
+const supabaseUrl = stripPrefix(process.env.SUPABASE_URL, "SUPABASE_URL");
+const supabaseAnonKey = stripPrefix(process.env.SUPABASE_ANON_KEY, "SUPABASE_ANON_KEY");
+
 export default defineConfig({
   base: basePath,
+  define: {
+    "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
+    "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabaseAnonKey),
+  },
   plugins: [
     react(),
     tailwindcss(),

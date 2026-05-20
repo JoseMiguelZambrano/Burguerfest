@@ -1,67 +1,243 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { AdminNavbar } from "@/components/admin/navbar";
 import { RestaurantList, type Restaurant } from "@/components/admin/restaurant-list";
 import { ParticipantList, type Participant } from "@/components/admin/participant-list";
 import { SolicitudesList, type SolicitudRestaurante } from "@/components/admin/solicitudes-list";
+import { useAuth } from "@/contexts/auth-context";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
-const sampleRestaurants: Restaurant[] = [
-  { id: "1", name: "Burger Plaza", address: "Av. Barcelona 123, Barcelona", schedule: "13:00 - 00:00", socialHandle: "@burgerplaza", status: "activo" },
-  { id: "2", name: "La Pizzería", address: "C/ Roma 45, Madrid", schedule: "12:00 - 23:00", socialHandle: "@lapizzeriacntr", status: "revision" },
-  { id: "3", name: "Tacos El Güero", address: "Pl. Mexico s/n, Valencia", schedule: "18:00 - 01:00", socialHandle: "@tacostguero", status: "inactivo" },
-  { id: "4", name: "Sushi Master", address: "C/ Tokio 78, Sevilla", schedule: "12:30 - 23:30", socialHandle: "@sushimaster_es", status: "activo" },
-  { id: "5", name: "El Asador", address: "Av. Carnes 321, Bilbao", schedule: "13:00 - 16:00, 20:00 - 00:00", socialHandle: "@elasadorbilbao", status: "revision" },
-];
+type RestaurantRow = {
+  id: string;
+  name: string;
+  location: string;
+  schedule: string | null;
+  status: "pending" | "approved" | "rejected";
+  signature_dish: string | null;
+  description: string | null;
+  instagram: string | null;
+  video_url: string | null;
+  logo_url: string | null;
+  created_at: string;
+  profiles?: { email?: string | null; display_name?: string | null } | null;
+};
 
-const sampleParticipants: Participant[] = [
-  { id: "1", name: "Carlos Martínez", email: "c.martinez@email.com", participantId: "PM10301", region: "Barcelona", status: "activo" },
-  { id: "2", name: "Elena García", email: "e.garcia@email.com", participantId: "PM10302", region: "Madrid", status: "revision" },
-  { id: "3", name: "Miguel Ruiz", email: "m.ruiz@email.com", participantId: "PM10303", region: "Valencia", status: "inactivo" },
-  { id: "4", name: "Ana López", email: "a.lopez@email.com", participantId: "PM10304", region: "Sevilla", status: "activo" },
-  { id: "5", name: "Pedro Sánchez", email: "p.sanchez@email.com", participantId: "PM10305", region: "Bilbao", status: "activo" },
-];
+type SponsorRow = {
+  id: string;
+  company_name: string;
+  contact_name: string | null;
+  status: "pending" | "approved" | "rejected";
+  tier: "gold" | "silver" | "bronze";
+  created_at: string;
+  logo_url: string | null;
+  profiles?: { email?: string | null; display_name?: string | null } | null;
+};
 
-const sampleSolicitudes: SolicitudRestaurante[] = [
-  { id: "1", name: "Burger Plaza", type: "restaurante", timestamp: "Hace 10 min", location: "Barcelona", schedule: "13:00-00:00", starDish: "Burger Trufada", socialHandle: "@burgerplaza", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." },
-  { id: "2", name: "Tacos El Güero", type: "restaurante", timestamp: "Ayer", location: "Valencia", schedule: "18:00-01:00", starDish: "Tacos al Pastor", socialHandle: "@tacostguero", description: "Auténtica comida mexicana con los mejores ingredientes. Nuestros tacos son preparados al momento con recetas tradicionales." },
-  { id: "3", name: "Logística Express", type: "patrocinador", timestamp: "Hace 2 horas", description: "Empresa líder en logística y distribución de alimentos. Más de 15 años de experiencia en el sector gastronómico." },
-  { id: "4", name: "TecnoFood", type: "patrocinador", timestamp: "Hace 1 día", description: "Soluciones tecnológicas para restaurantes. Software de gestión, TPV y sistemas de pedidos online." },
-  { id: "5", name: "La Pizzería", type: "restaurante", timestamp: "Hace 3 días", location: "Madrid", schedule: "12:00-23:00", starDish: "Pizza Napolitana", socialHandle: "@lapizzeria_mad", description: "La mejor pizza artesanal de Madrid. Horno de leña tradicional y masa madre fermentada 48 horas." },
-  { id: "6", name: "NUEVO PATROCINANTE", type: "patrocinador", timestamp: "Reciente", description: "Nueva solicitud de patrocinio pendiente de revisión." },
-];
+type ProfileRow = {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  role: "admin" | "restaurante" | "patrocinador";
+  created_at: string;
+};
+
+function statusToBadge(s: string): Restaurant["status"] {
+  if (s === "approved") return "activo";
+  if (s === "pending") return "revision";
+  return "inactivo";
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `Hace ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `Hace ${h} h`;
+  const d = Math.floor(h / 24);
+  return `Hace ${d} d`;
+}
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<"solicitudes" | "restaurantes" | "participantes">("restaurantes");
+  const { session, role, loading: authLoading, signOut } = useAuth();
+  const [, navigate] = useLocation();
+  const [activeTab, setActiveTab] = useState<"solicitudes" | "restaurantes" | "participantes">("solicitudes");
 
-  const noop = (id: string) => console.log(id);
+  const [restaurants, setRestaurants] = useState<RestaurantRow[]>([]);
+  const [sponsors, setSponsors] = useState<SponsorRow[]>([]);
+  const [pendingR, setPendingR] = useState<RestaurantRow[]>([]);
+  const [pendingS, setPendingS] = useState<SponsorRow[]>([]);
+  const [participants, setParticipants] = useState<ProfileRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadAll() {
+    setLoading(true);
+    setError(null);
+    try {
+      const [r, s, sub, p] = await Promise.all([
+        api<{ items: RestaurantRow[] }>("/admin/restaurants"),
+        api<{ items: SponsorRow[] }>("/admin/sponsors"),
+        api<{ restaurants: RestaurantRow[]; sponsors: SponsorRow[] }>("/admin/submissions"),
+        api<{ items: ProfileRow[] }>("/admin/participants"),
+      ]);
+      setRestaurants(r.items);
+      setSponsors(s.items);
+      setPendingR(sub.restaurants);
+      setPendingS(sub.sponsors);
+      setParticipants(p.items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error cargando datos");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!authLoading && session && role === "admin") loadAll();
+  }, [authLoading, session, role]);
+
+  if (authLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-lg text-muted-foreground">Necesitas iniciar sesión como administrador.</p>
+        <Button onClick={() => navigate("/login")}>Iniciar sesión</Button>
+      </div>
+    );
+  }
+
+  if (role !== "admin") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-lg text-muted-foreground">Tu cuenta no tiene permisos de administrador.</p>
+        <p className="text-sm text-muted-foreground">Pídele a un administrador que ejecute en Supabase:<br/>
+          <code className="bg-muted px-2 py-1 rounded mt-2 inline-block">update profiles set role='admin' where email='tu@correo.com';</code>
+        </p>
+        <Button variant="outline" onClick={async () => { await signOut(); navigate("/login"); }}>Cerrar sesión</Button>
+      </div>
+    );
+  }
+
+  const restaurantRows: Restaurant[] = restaurants.map((r) => ({
+    id: r.id,
+    name: r.name,
+    address: r.location,
+    schedule: r.schedule ?? "",
+    socialHandle: r.instagram ?? r.profiles?.email ?? "",
+    status: statusToBadge(r.status),
+    avatarUrl: r.logo_url ?? undefined,
+  }));
+
+  const participantRows: Participant[] = participants.map((p) => ({
+    id: p.id,
+    name: p.display_name ?? p.email ?? "Sin nombre",
+    email: p.email ?? "",
+    participantId: p.role.toUpperCase(),
+    region: "—",
+    status: "activo",
+  }));
+
+  const solicitudes: SolicitudRestaurante[] = [
+    ...pendingR.map<SolicitudRestaurante>((r) => ({
+      id: `r-${r.id}`,
+      name: r.name,
+      type: "restaurante",
+      timestamp: timeAgo(r.created_at),
+      location: r.location,
+      schedule: r.schedule ?? undefined,
+      starDish: r.signature_dish ?? undefined,
+      socialHandle: r.instagram ?? undefined,
+      description: r.description ?? undefined,
+      videoUrl: r.video_url ?? undefined,
+      avatarUrl: r.logo_url ?? undefined,
+    })),
+    ...pendingS.map<SolicitudRestaurante>((s) => ({
+      id: `s-${s.id}`,
+      name: s.company_name,
+      type: "patrocinador",
+      timestamp: timeAgo(s.created_at),
+      description: s.contact_name ? `Contacto: ${s.contact_name}` : undefined,
+      avatarUrl: s.logo_url ?? undefined,
+    })),
+  ];
+
+  async function approveRestaurant(id: string) {
+    await api(`/admin/restaurants/${id}`, { method: "PATCH", json: { status: "approved" } });
+    await loadAll();
+  }
+  async function rejectRestaurant(id: string) {
+    await api(`/admin/restaurants/${id}`, { method: "PATCH", json: { status: "rejected" } });
+    await loadAll();
+  }
+  async function approveSponsor(id: string) {
+    await api(`/admin/sponsors/${id}`, { method: "PATCH", json: { status: "approved" } });
+    await loadAll();
+  }
+  async function rejectSponsor(id: string) {
+    await api(`/admin/sponsors/${id}`, { method: "PATCH", json: { status: "rejected" } });
+    await loadAll();
+  }
+
+  async function onAprobar(prefixedId: string) {
+    if (prefixedId.startsWith("r-")) await approveRestaurant(prefixedId.slice(2));
+    else if (prefixedId.startsWith("s-")) await approveSponsor(prefixedId.slice(2));
+  }
+  async function onRechazar(prefixedId: string) {
+    if (prefixedId.startsWith("r-")) await rejectRestaurant(prefixedId.slice(2));
+    else if (prefixedId.startsWith("s-")) await rejectSponsor(prefixedId.slice(2));
+  }
+
+  async function deleteRestaurant(id: string) {
+    if (!confirm("¿Eliminar este restaurante?")) return;
+    await api(`/admin/restaurants/${id}`, { method: "DELETE" });
+    await loadAll();
+  }
+  async function deleteParticipant(id: string) {
+    if (!confirm("¿Eliminar este usuario? Esta acción es permanente.")) return;
+    await api(`/admin/participants/${id}`, { method: "DELETE" });
+    await loadAll();
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <AdminNavbar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="w-full px-6 lg:px-8 py-8">
-        {activeTab === "restaurantes" && (
+        {error && (
+          <div className="mb-4 p-4 rounded-md bg-red-50 text-red-800 text-sm">{error}</div>
+        )}
+        {loading && <p className="text-muted-foreground">Cargando...</p>}
+
+        {!loading && activeTab === "restaurantes" && (
           <RestaurantList
-            restaurants={sampleRestaurants}
-            onDelete={noop}
-            onViewDetails={noop}
-            onWhatsApp={noop}
+            restaurants={restaurantRows}
+            onDelete={deleteRestaurant}
+            onViewDetails={(id) => console.log("view", id)}
+            onWhatsApp={(id) => console.log("whatsapp", id)}
           />
         )}
 
-        {activeTab === "participantes" && (
+        {!loading && activeTab === "participantes" && (
           <ParticipantList
-            participants={sampleParticipants}
-            onDelete={noop}
-            onViewProfile={noop}
-            onEmail={noop}
+            participants={participantRows}
+            onDelete={deleteParticipant}
+            onViewProfile={(id) => console.log("profile", id)}
+            onEmail={(id) => {
+              const p = participants.find((x) => x.id === id);
+              if (p?.email) window.location.href = `mailto:${p.email}`;
+            }}
           />
         )}
 
-        {activeTab === "solicitudes" && (
+        {!loading && activeTab === "solicitudes" && (
           <SolicitudesList
-            solicitudes={sampleSolicitudes}
-            onAprobar={noop}
-            onRechazar={noop}
+            solicitudes={solicitudes}
+            onAprobar={onAprobar}
+            onRechazar={onRechazar}
           />
         )}
       </main>
