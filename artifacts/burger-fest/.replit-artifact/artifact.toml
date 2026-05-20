@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Burger Fest 2026"
+version = "1.0.0"
+id = "artifacts/burger-fest"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18278
+
+[services.development]
+run = "pnpm --filter @workspace/burger-fest run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/burger-fest", "run", "build" ]
+publicDir = "artifacts/burger-fest/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18278"
+BASE_PATH = "/"
