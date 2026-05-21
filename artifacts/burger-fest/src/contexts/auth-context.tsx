@@ -60,15 +60,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Local scope: clears tokens immediately without a network round-trip,
-    // so the UI updates even if Supabase is unreachable.
+    // 1) Try the proper supabase signout (local scope, no network needed)
     try {
       await supabase.auth.signOut({ scope: "local" });
     } catch (err) {
       console.warn("signOut error (ignored):", err);
     }
+    // 2) Force-clear any Supabase tokens from local/session storage
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith("sb-") || k.includes("supabase"))) keys.push(k);
+      }
+      keys.forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+    } catch (err) {
+      console.warn("storage clear failed:", err);
+    }
+    // 3) Clear React state
     setSession(null);
     setRole(null);
+    // 4) Hard reload to the landing — guarantees a clean slate
+    window.location.href = "/";
   };
 
   return (
