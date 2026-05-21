@@ -9,94 +9,65 @@ interface SponsorsProps {
   sponsors: Sponsor[];
 }
 
+const tierMeta = {
+  gold:   { label: "Patrocinadores Gold",   color: "text-brand-gold",   size: "w-44 h-24 lg:w-52 lg:h-28" },
+  silver: { label: "Patrocinadores Silver", color: "text-brand-cream/70", size: "w-36 h-20 lg:w-44 lg:h-24" },
+  bronze: { label: "Patrocinadores Bronze", color: "text-brand-flame/80", size: "w-28 h-16 lg:w-36 lg:h-20" },
+};
+
 export function Sponsors({ sponsors }: SponsorsProps) {
-  const goldSponsors = sponsors.filter((s) => s.tier === "gold");
-  const silverSponsors = sponsors.filter((s) => s.tier === "silver");
-  const bronzeSponsors = sponsors.filter((s) => s.tier === "bronze");
+  const groups = (["gold", "silver", "bronze"] as const).map((t) => ({
+    tier: t, items: sponsors.filter((s) => s.tier === t),
+  }));
 
   return (
     <section
       id="patrocinadores"
-      className="py-16 lg:py-24 bg-background"
+      className="relative py-20 lg:py-28 bg-brand-ink overflow-hidden"
       aria-labelledby="patrocinadores-heading"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-12">
+      <div className="absolute inset-0 opacity-[0.06] bg-grain" />
+      <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-brand-maroon blur-3xl opacity-40" />
+      <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-brand-flame blur-3xl opacity-20" />
+
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-brand-gold/15 text-brand-gold">
+            <span className="text-xs font-bold uppercase tracking-[0.2em]">Aliados</span>
+          </div>
           <h2
             id="patrocinadores-heading"
-            className="text-3xl lg:text-4xl font-bold text-foreground mb-4"
+            className="font-display text-5xl lg:text-6xl text-brand-cream leading-none mb-3"
           >
-            Nuestros Patrocinadores
+            Quienes hacen posible <span className="text-brand-gold">el fuego</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Gracias a nuestros patrocinadores por hacer posible Burger Fest
+          <p className="text-base text-brand-cream/70 max-w-2xl mx-auto">
+            Marcas que apoyan la cultura de la hamburguesa en cada edición.
           </p>
         </div>
 
-        {goldSponsors.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-center text-sm font-semibold text-amber-600 uppercase tracking-wider mb-6">
-              Patrocinadores Gold
-            </h3>
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {goldSponsors.map((sponsor) => (
-                <div
-                  key={sponsor.id}
-                  className="relative w-40 h-20 lg:w-48 lg:h-24 grayscale hover:grayscale-0 transition-all duration-300"
-                >
-                  <img
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} - Patrocinador Gold`}
-                    className="absolute inset-0 w-full h-full object-contain"
-                  />
-                </div>
-              ))}
+        {groups.map(({ tier, items }) =>
+          items.length === 0 ? null : (
+            <div key={tier} className="mb-12 last:mb-0">
+              <h3 className={`text-center text-xs font-bold uppercase tracking-[0.3em] mb-6 ${tierMeta[tier].color}`}>
+                {tierMeta[tier].label}
+              </h3>
+              <div className="flex flex-wrap justify-center items-center gap-6 lg:gap-10">
+                {items.map((sponsor) => (
+                  <div
+                    key={sponsor.id}
+                    className={`relative ${tierMeta[tier].size} bg-brand-cream/5 hover:bg-brand-cream rounded-xl p-3 grayscale brightness-200 contrast-50 hover:grayscale-0 hover:brightness-100 hover:contrast-100 transition-all duration-300 border border-brand-cream/10 hover:border-brand-gold`}
+                  >
+                    <img
+                      src={sponsor.logo}
+                      alt={`${sponsor.name}`}
+                      className="absolute inset-3 w-[calc(100%-1.5rem)] h-[calc(100%-1.5rem)] object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        {silverSponsors.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-center text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">
-              Patrocinadores Silver
-            </h3>
-            <div className="flex flex-wrap justify-center items-center gap-6 lg:gap-10">
-              {silverSponsors.map((sponsor) => (
-                <div
-                  key={sponsor.id}
-                  className="relative w-32 h-16 lg:w-40 lg:h-20 grayscale hover:grayscale-0 transition-all duration-300"
-                >
-                  <img
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} - Patrocinador Silver`}
-                    className="absolute inset-0 w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {bronzeSponsors.length > 0 && (
-          <div>
-            <h3 className="text-center text-sm font-semibold text-orange-700 uppercase tracking-wider mb-6">
-              Patrocinadores Bronze
-            </h3>
-            <div className="flex flex-wrap justify-center items-center gap-4 lg:gap-8">
-              {bronzeSponsors.map((sponsor) => (
-                <div
-                  key={sponsor.id}
-                  className="relative w-24 h-12 lg:w-32 lg:h-16 grayscale hover:grayscale-0 transition-all duration-300"
-                >
-                  <img
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} - Patrocinador Bronze`}
-                    className="absolute inset-0 w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          )
         )}
       </div>
     </section>

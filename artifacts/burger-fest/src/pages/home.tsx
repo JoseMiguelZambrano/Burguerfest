@@ -4,6 +4,7 @@ import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { FeaturedRestaurants } from "@/components/landing/featured-restaurants";
 import { Sponsors } from "@/components/landing/sponsors";
 import { CTASection } from "@/components/landing/cta-section";
+import { MarqueeStrip } from "@/components/landing/marquee-strip";
 import { Footer } from "@/components/landing/footer";
 import { JsonLd } from "@/components/seo/json-ld";
 import { api } from "@/lib/api";
@@ -81,9 +82,11 @@ export default function Home() {
           <HeroCarousel events={events} />
         </div>
 
-        <CTASection />
+        <MarqueeStrip />
 
         <FeaturedRestaurants restaurants={restaurants} />
+
+        <CTASection />
 
         <Sponsors sponsors={sponsors} />
       </main>
