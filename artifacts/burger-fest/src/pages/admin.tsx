@@ -103,21 +103,27 @@ export default function Admin() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-lg text-muted-foreground">Necesitas iniciar sesión como administrador.</p>
-        <Button onClick={() => navigate("/login")}>Iniciar sesión</Button>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background bg-grain">
+        <p className="font-display text-3xl text-brand-ink">Acceso restringido</p>
+        <p className="text-muted-foreground">Necesitas iniciar sesión como administrador.</p>
+        <Button onClick={() => navigate("/login")} className="bg-brand-flame hover:bg-brand-flame/90 text-brand-cream font-bold uppercase tracking-wider">
+          Iniciar sesión
+        </Button>
       </div>
     );
   }
 
   if (role !== "admin") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-lg text-muted-foreground">Tu cuenta no tiene permisos de administrador.</p>
-        <p className="text-sm text-muted-foreground">Pídele a un administrador que ejecute en Supabase:<br/>
-          <code className="bg-muted px-2 py-1 rounded mt-2 inline-block">update profiles set role='admin' where email='tu@correo.com';</code>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center bg-background bg-grain">
+        <p className="font-display text-3xl text-brand-ink">Permisos insuficientes</p>
+        <p className="text-muted-foreground">Tu cuenta no tiene permisos de administrador.</p>
+        <p className="text-sm text-muted-foreground max-w-md">Pídele a un administrador que ejecute en Supabase:<br/>
+          <code className="bg-muted px-2 py-1 rounded mt-2 inline-block text-xs">update profiles set role='admin' where email='tu@correo.com';</code>
         </p>
-        <Button variant="outline" onClick={async () => { await signOut(); navigate("/login"); }}>Cerrar sesión</Button>
+        <Button variant="outline" onClick={async () => { await signOut(); navigate("/login"); }} className="border-brand-maroon text-brand-maroon hover:bg-brand-maroon hover:text-brand-cream">
+          Cerrar sesión
+        </Button>
       </div>
     );
   }
@@ -203,14 +209,18 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-grain">
       <AdminNavbar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="w-full px-6 lg:px-8 py-8">
+      <main className="w-full px-6 lg:px-8 py-10">
         {error && (
-          <div className="mb-4 p-4 rounded-md bg-red-50 text-red-800 text-sm">{error}</div>
+          <div className="max-w-7xl mx-auto mb-4 p-4 rounded-xl bg-brand-flame/10 border border-brand-flame/30 text-brand-flame text-sm">
+            {error}
+          </div>
         )}
-        {loading && <p className="text-muted-foreground">Cargando...</p>}
+        {loading && (
+          <p className="max-w-7xl mx-auto text-muted-foreground">Cargando...</p>
+        )}
 
         {!loading && activeTab === "restaurantes" && (
           <RestaurantList
@@ -242,10 +252,10 @@ export default function Admin() {
         )}
       </main>
 
-      <footer className="w-full border-t border-border bg-card py-6">
+      <footer className="w-full border-t border-border bg-brand-maroon-deep text-brand-cream py-6 mt-10">
         <div className="px-6 lg:px-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Burger Fest. Todos los derechos reservados.
+          <p className="text-sm text-brand-cream/60">
+            © {new Date().getFullYear()} Burger Fest · Panel de administración
           </p>
         </div>
       </footer>

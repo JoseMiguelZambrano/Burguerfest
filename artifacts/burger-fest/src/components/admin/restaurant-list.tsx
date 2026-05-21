@@ -21,29 +21,13 @@ interface RestaurantRowProps {
 
 function StatusBadge({ status }: { status: Restaurant["status"] }) {
   const config = {
-    activo: {
-      label: "Activo",
-      className: "bg-emerald-500 text-white badge-active",
-    },
-    revision: {
-      label: "En Revisión",
-      className: "bg-amber-500 text-white badge-review",
-    },
-    inactivo: {
-      label: "Inactivo",
-      className: "bg-slate-400 text-white",
-    },
+    activo:    { label: "Activo",      className: "bg-emerald-600 text-white badge-active" },
+    revision:  { label: "En revisión", className: "bg-brand-gold text-brand-ink badge-review" },
+    inactivo:  { label: "Inactivo",    className: "bg-muted text-muted-foreground" },
   };
-
   const { label, className } = config[status];
-
   return (
-    <span
-      className={`
-        inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-        transition-all duration-300 ${className}
-      `}
-    >
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${className}`}>
       {label}
     </span>
   );
@@ -51,103 +35,44 @@ function StatusBadge({ status }: { status: Restaurant["status"] }) {
 
 function RestaurantRow({ restaurant, onDelete, onViewDetails, onWhatsApp }: RestaurantRowProps) {
   return (
-    <div
-      className="
-        w-full bg-card rounded-xl border border-border
-        p-5 flex flex-col lg:flex-row items-start lg:items-center gap-5
-        hover:shadow-md hover:border-primary/20 transition-all duration-300
-      "
-    >
-      {/* Avatar */}
+    <div className="w-full bg-card rounded-xl border border-border p-5 flex flex-col lg:flex-row items-start lg:items-center gap-5 hover:border-brand-gold/60 hover:shadow-md transition-all">
       <div className="flex-shrink-0">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+        <div className="w-14 h-14 rounded-full bg-brand-maroon/10 flex items-center justify-center overflow-hidden border-2 border-brand-gold/30">
           {restaurant.avatarUrl ? (
-            <img
-              src={restaurant.avatarUrl}
-              alt={restaurant.name}
-              className="w-full h-full object-cover"
-            />
+            <img src={restaurant.avatarUrl} alt={restaurant.name} className="w-full h-full object-cover" />
           ) : (
-            <svg
-              className="w-10 h-10 text-muted-foreground"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-8 h-8 text-brand-maroon" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
           )}
         </div>
       </div>
 
-      {/* Info Section */}
-      <div className="flex-1 min-w-0 space-y-2">
-        <h3 className="text-lg font-semibold text-foreground truncate">
-          {restaurant.name}
-        </h3>
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <MapPin className="w-4 h-4" />
-            {restaurant.address}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
-            {restaurant.schedule}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-4 h-4 flex items-center justify-center text-xs font-bold">@</span>
-            {restaurant.socialHandle}
-          </span>
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <h3 className="font-display text-xl text-brand-ink tracking-wide truncate">{restaurant.name}</h3>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-brand-flame" />{restaurant.address}</span>
+          <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-brand-flame" />{restaurant.schedule}</span>
+          {restaurant.socialHandle && (
+            <span className="flex items-center gap-1.5"><span className="text-brand-maroon font-bold">@</span>{restaurant.socialHandle}</span>
+          )}
         </div>
       </div>
 
-      {/* Status Badge */}
-      <div className="flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground hidden md:inline">Estado:</span>
-          <StatusBadge status={restaurant.status} />
-        </div>
-      </div>
+      <StatusBadge status={restaurant.status} />
 
-      {/* Action Buttons */}
       <div className="flex items-center gap-2 flex-shrink-0 w-full lg:w-auto justify-end">
-        <button
-          onClick={() => onDelete(restaurant.id)}
-          className="
-            inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-            bg-red-600 hover:bg-red-700 text-white text-sm font-medium
-            transition-all duration-200 shadow-sm hover:shadow-md
-            active:scale-95
-          "
-        >
+        <button onClick={() => onDelete(restaurant.id)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-flame/10 hover:bg-brand-flame hover:text-brand-cream text-brand-flame text-xs font-bold uppercase tracking-wider transition-all">
           <Trash2 className="w-4 h-4" />
-          <span>ELIMINAR</span>
+          <span className="hidden sm:inline">Eliminar</span>
         </button>
-
-        <button
-          onClick={() => onViewDetails(restaurant.id)}
-          className="
-            inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-            bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium
-            transition-all duration-200 shadow-sm hover:shadow-md
-            active:scale-95
-          "
-        >
+        <button onClick={() => onViewDetails(restaurant.id)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-maroon/10 hover:bg-brand-maroon hover:text-brand-cream text-brand-maroon text-xs font-bold uppercase tracking-wider transition-all">
           <LinkIcon className="w-4 h-4" />
-          <span>VER FICHA</span>
+          <span className="hidden sm:inline">Ficha</span>
         </button>
-
-        <button
-          onClick={() => onWhatsApp(restaurant.id)}
-          className="
-            inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-            bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium
-            transition-all duration-200 shadow-sm hover:shadow-md
-            active:scale-95
-          "
-        >
+        <button onClick={() => onWhatsApp(restaurant.id)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600/10 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold uppercase tracking-wider transition-all">
           <MessageCircle className="w-4 h-4" />
-          <span className="hidden sm:inline">CONTACTAR WHATSAPP</span>
-          <span className="sm:hidden">WHATSAPP</span>
+          <span className="hidden sm:inline">WhatsApp</span>
         </button>
       </div>
     </div>
@@ -161,85 +86,47 @@ interface RestaurantListProps {
   onWhatsApp: (id: string) => void;
 }
 
-export function RestaurantList({
-  restaurants,
-  onDelete,
-  onViewDetails,
-  onWhatsApp,
-}: RestaurantListProps) {
+export function RestaurantList({ restaurants, onDelete, onViewDetails, onWhatsApp }: RestaurantListProps) {
   return (
-    <div className="w-full">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">
-          PANEL DE ADMINISTRACIÓN - GESTIÓN DE RESTAURANTES
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="mb-7">
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-brand-maroon/10 text-brand-maroon">
+          <span className="text-xs font-bold uppercase tracking-[0.2em]">Directorio</span>
+        </div>
+        <h1 className="font-display text-4xl lg:text-5xl text-brand-ink leading-none">
+          Restaurantes <span className="text-brand-flame">activos</span>
         </h1>
       </div>
 
-      {/* Content Card */}
       <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
-        {/* Section Header */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-foreground">
-            ESTADO DE RESTAURANTES{" "}
-            <span className="text-muted-foreground font-normal">(TIPO: RESTAURANTE)</span>
-          </h2>
-        </div>
-
-        {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Buscar por nombre o ubicación..."
-              className="
-                w-full pl-12 pr-4 py-3 rounded-xl border border-border
-                bg-muted/50 text-foreground placeholder:text-muted-foreground
-                focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-                transition-all duration-200
-              "
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-flame/30 focus:border-brand-flame transition-all"
             />
           </div>
-          <button className="
-            p-3 rounded-xl border border-border bg-muted/50
-            hover:bg-muted transition-colors duration-200
-            flex items-center justify-center
-          ">
+          <button className="p-3 rounded-xl border border-border bg-muted/40 hover:bg-muted transition-colors flex items-center justify-center">
             <Filter className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Restaurant Rows */}
-        <div className="space-y-4">
-          {restaurants.map((restaurant) => (
-            <RestaurantRow
-              key={restaurant.id}
-              restaurant={restaurant}
-              onDelete={onDelete}
-              onViewDetails={onViewDetails}
-              onWhatsApp={onWhatsApp}
-            />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <button className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            {"‹"} Anterior
-          </button>
-          <button className="w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-            1
-          </button>
-          <button className="w-9 h-9 rounded-lg hover:bg-muted text-muted-foreground text-sm font-medium transition-colors">
-            2
-          </button>
-          <button className="w-9 h-9 rounded-lg hover:bg-muted text-muted-foreground text-sm font-medium transition-colors">
-            3
-          </button>
-          <button className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Siguiente {">"}
-          </button>
+        <div className="space-y-3">
+          {restaurants.length === 0 ? (
+            <p className="text-center text-muted-foreground py-10">Aún no hay restaurantes aprobados.</p>
+          ) : (
+            restaurants.map((r) => (
+              <RestaurantRow
+                key={r.id}
+                restaurant={r}
+                onDelete={onDelete}
+                onViewDetails={onViewDetails}
+                onWhatsApp={onWhatsApp}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

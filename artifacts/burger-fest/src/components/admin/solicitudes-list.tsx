@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, XCircle, MapPin, Clock, Star, User, Play } from "lucide-react";
+import { CheckCircle, XCircle, MapPin, Clock, Star, User, Play, Inbox } from "lucide-react";
 
 export interface SolicitudRestaurante {
   id: string;
@@ -30,199 +30,191 @@ export function SolicitudesList({ solicitudes, onAprobar, onRechazar }: Solicitu
 
   const restaurantes = solicitudes.filter((s) => s.type === "restaurante");
   const patrocinadores = solicitudes.filter((s) => s.type === "patrocinador");
-
   const selected = solicitudes.find((s) => s.id === selectedId);
 
   return (
-    <div className="w-full">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">
-          PANEL DE ADMINISTRACIÓN - GESTIÓN DE SOLICITUDES
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="mb-7">
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-brand-flame/10 text-brand-flame">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-flame animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-[0.2em]">Bandeja</span>
+        </div>
+        <h1 className="font-display text-4xl lg:text-5xl text-brand-ink leading-none">
+          Solicitudes <span className="text-brand-flame">pendientes</span>
         </h1>
       </div>
 
-      {/* Master-Detail Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar - Solicitudes List */}
-        <div className="w-full lg:w-[350px] flex-shrink-0 space-y-6">
-          {/* Restaurantes Section */}
-          <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
-              Solicitudes de Restaurantes ({restaurantes.length})
-            </h3>
-            <div className="space-y-2">
-              {restaurantes.map((solicitud) => (
-                <button
-                  key={solicitud.id}
-                  onClick={() => setSelectedId(solicitud.id)}
-                  className={`
-                    w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-                    ${
-                      selectedId === solicitud.id
-                        ? "bg-primary/10 border-2 border-primary"
-                        : "bg-muted/50 hover:bg-muted border-2 border-transparent"
-                    }
-                  `}
-                >
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                    <span className="text-lg">🍔</span>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-foreground">{solicitud.name}</p>
-                    <p className="text-xs text-muted-foreground">{solicitud.timestamp}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+        <aside className="w-full lg:w-[340px] flex-shrink-0 space-y-5">
+          <SidebarGroup
+            title={`Restaurantes (${restaurantes.length})`}
+            accent="flame"
+            emoji="🍔"
+            items={restaurantes}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+          <SidebarGroup
+            title={`Patrocinadores (${patrocinadores.length})`}
+            accent="gold"
+            emoji="🏢"
+            items={patrocinadores}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+        </aside>
 
-          {/* Patrocinadores Section */}
-          <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
-              Solicitudes de Patrocinadores ({patrocinadores.length})
-            </h3>
-            <div className="space-y-2">
-              {patrocinadores.map((solicitud) => (
-                <button
-                  key={solicitud.id}
-                  onClick={() => setSelectedId(solicitud.id)}
-                  className={`
-                    w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-                    ${
-                      selectedId === solicitud.id
-                        ? "bg-primary/10 border-2 border-primary"
-                        : "bg-muted/50 hover:bg-muted border-2 border-transparent"
-                    }
-                  `}
-                >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-lg">🏢</span>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-foreground">{solicitud.name}</p>
-                    <p className="text-xs text-muted-foreground">{solicitud.timestamp}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Detail Panel */}
         <div className="flex-1">
           {selected ? (
-            <div className="bg-card rounded-2xl border border-border p-6">
-              {/* Detail Header */}
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-foreground">
-                  DETALLE DE SOLICITUD (TIPO: {selected.type.toUpperCase()}) - {selected.name.toUpperCase()}
+            <div className="bg-card rounded-2xl border border-border shadow-xl shadow-brand-maroon/5 overflow-hidden">
+              <div className="bg-maroon-gradient px-6 py-5 text-brand-cream">
+                <div className="text-xs uppercase tracking-[0.25em] text-brand-gold mb-1">
+                  {selected.type === "restaurante" ? "Restaurante" : "Patrocinador"} · {selected.timestamp}
+                </div>
+                <h2 className="font-display text-3xl lg:text-4xl tracking-wide">
+                  {selected.name}
                 </h2>
+              </div>
 
-                {/* Quick Info */}
-                <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
+              <div className="p-6">
+                <div className="flex flex-wrap gap-4 mb-6 text-sm text-foreground">
                   {selected.location && (
                     <span className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-red-500" />
+                      <MapPin className="w-4 h-4 text-brand-flame" />
                       {selected.location}
                     </span>
                   )}
                   {selected.schedule && (
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-blue-500" />
+                      <Clock className="w-4 h-4 text-brand-flame" />
                       {selected.schedule}
                     </span>
                   )}
                   {selected.starDish && (
                     <span className="flex items-center gap-1.5">
-                      <Star className="w-4 h-4 text-amber-500" />
+                      <Star className="w-4 h-4 text-brand-gold" />
                       {selected.starDish}
                     </span>
                   )}
                   {selected.socialHandle && (
                     <span className="flex items-center gap-1.5">
-                      <User className="w-4 h-4 text-emerald-500" />
+                      <User className="w-4 h-4 text-brand-maroon" />
                       {selected.socialHandle}
                     </span>
                   )}
                 </div>
-              </div>
 
-              {/* Description */}
-              {selected.description && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
-                    Descripción
-                  </h3>
-                  <div className="bg-muted/50 rounded-xl p-4 border border-border">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {selected.description}
-                    </p>
+                {selected.description && (
+                  <div className="mb-6">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-maroon mb-2">
+                      Descripción
+                    </h3>
+                    <div className="bg-muted/40 rounded-xl p-4 border border-border">
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        {selected.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Video Preview */}
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
-                  Video de Presentación
-                </h3>
-                <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden relative group">
-                  <img
-                    src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=450&fit=crop"
-                    alt="Video preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
-                    <button className="w-16 h-16 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all shadow-lg group-hover:scale-110">
-                      <Play className="w-7 h-7 text-slate-900 ml-1" />
-                    </button>
+                {selected.videoUrl && (
+                  <div className="mb-7">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-maroon mb-3">
+                      Video de presentación
+                    </h3>
+                    <div className="aspect-video bg-brand-ink rounded-xl overflow-hidden relative group">
+                      <video
+                        src={selected.videoUrl}
+                        controls
+                        className="w-full h-full object-cover"
+                        poster={selected.avatarUrl}
+                      />
+                    </div>
                   </div>
+                )}
+
+                {!selected.videoUrl && selected.type === "restaurante" && (
+                  <div className="mb-7">
+                    <div className="aspect-video bg-brand-ink/90 rounded-xl flex flex-col items-center justify-center text-brand-cream/60 border border-border">
+                      <Play className="w-10 h-10 mb-2" />
+                      <span className="text-sm">Sin video</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => onAprobar(selected.id)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  >
+                    <CheckCircle className="w-5 h-5" />
+                    Aprobar
+                  </button>
+                  <button
+                    onClick={() => onRechazar(selected.id)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-flame hover:bg-brand-flame/90 text-brand-cream font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  >
+                    <XCircle className="w-5 h-5" />
+                    Rechazar
+                  </button>
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => onAprobar(selected.id)}
-                  className="
-                    flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl
-                    bg-emerald-600 hover:bg-emerald-700 text-white font-semibold
-                    transition-all duration-200 shadow-lg hover:shadow-xl
-                    active:scale-[0.98]
-                  "
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  APROBAR REGISTRO
-                </button>
-
-                <button
-                  onClick={() => onRechazar(selected.id)}
-                  className="
-                    flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl
-                    bg-red-600 hover:bg-red-700 text-white font-semibold
-                    transition-all duration-200 shadow-lg hover:shadow-xl
-                    active:scale-[0.98]
-                  "
-                >
-                  <XCircle className="w-5 h-5" />
-                  RECHAZAR REGISTRO
-                </button>
-              </div>
-
-              {/* Skip Link */}
-              <div className="mt-4 text-center">
-                <button className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors">
-                  Ver Siguiente Solicitud
-                </button>
               </div>
             </div>
           ) : (
-            <div className="bg-card rounded-2xl border border-border p-12 text-center">
-              <p className="text-muted-foreground">Selecciona una solicitud para ver los detalles</p>
+            <div className="bg-card rounded-2xl border border-border p-16 text-center">
+              <Inbox className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">No hay solicitudes pendientes.</p>
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SidebarGroup({
+  title, accent, emoji, items, selectedId, onSelect,
+}: {
+  title: string;
+  accent: "flame" | "gold";
+  emoji: string;
+  items: SolicitudRestaurante[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const accentBg = accent === "flame" ? "bg-brand-flame/15" : "bg-brand-gold/15";
+  const accentBorder = accent === "flame" ? "border-brand-flame" : "border-brand-gold";
+  const accentText = accent === "flame" ? "text-brand-flame" : "text-brand-maroon";
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+      <h3 className={`text-xs font-bold uppercase tracking-[0.2em] ${accentText} mb-3`}>
+        {title}
+      </h3>
+      <div className="space-y-1.5">
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground px-2 py-3 text-center">Sin solicitudes</p>
+        ) : (
+          items.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onSelect(s.id)}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                selectedId === s.id
+                  ? `${accentBg} ${accentBorder}`
+                  : "bg-transparent border-transparent hover:bg-muted/60"
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-full ${accentBg} flex items-center justify-center text-lg`}>
+                {emoji}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{s.name}</p>
+                <p className="text-xs text-muted-foreground">{s.timestamp}</p>
+              </div>
+            </button>
+          ))
+        )}
       </div>
     </div>
   );
