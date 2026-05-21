@@ -27,7 +27,7 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
       localStorage.removeItem("bf-auth");
       sessionStorage.clear();
     } catch (_) {}
-    window.location.reload();
+    window.location.assign("/");
   };
 
   return (

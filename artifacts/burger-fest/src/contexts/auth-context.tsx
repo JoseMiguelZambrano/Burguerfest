@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setRole(null);
     // 4) Hard reload to the landing — guarantees a clean slate
-    window.location.href = import.meta.env.BASE_URL ?? "/";
+    window.location.assign("/");
   };
 
   return (
