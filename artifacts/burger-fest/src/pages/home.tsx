@@ -13,25 +13,25 @@ type RestaurantRow = { id: string; name: string; location: string; schedule: str
 type SponsorRow = { id: string; company_name: string; logo_url: string | null; tier: "gold" | "silver" | "bronze" };
 
 const fallbackEvents = [
-  { id: "1", title: "Burger Fest 2026 - 6ta Edición", description: "El festival gastronómico más importante dedicado a la cultura de las hamburguesas regresa con su sexta edición. Más de 50 restaurantes participantes.", date: "21 - 30 de Junio, 2026", image: "/images/hero-banner.jpeg" },
-  { id: "2", title: "Concurso de la Mejor Hamburguesa", description: "Los mejores chefs compiten por el título de la mejor hamburguesa del festival. Votación popular y jurado experto.", date: "25 de Junio, 2026", image: "/images/hero-banner.jpeg" },
-  { id: "3", title: "Noche de Food Trucks", description: "Una experiencia única con los mejores food trucks de la región. Música en vivo y ambiente festivo.", date: "28 de Junio, 2026", image: "/images/hero-banner.jpeg" },
+  { id: "1", title: "Burger Fest 2026 - 6ta Edición", description: "El festival gastronómico más importante dedicado a la cultura de las hamburguesas regresa con su sexta edición. Más de 50 restaurantes participantes.", date: "21 - 30 de Junio, 2026", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg" },
+  { id: "2", title: "Concurso de la Mejor Hamburguesa", description: "Los mejores chefs compiten por el título de la mejor hamburguesa del festival. Votación popular y jurado experto.", date: "25 de Junio, 2026", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg" },
+  { id: "3", title: "Noche de Food Trucks", description: "Una experiencia única con los mejores food trucks de la región. Música en vivo y ambiente festivo.", date: "28 de Junio, 2026", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg" },
 ];
 
 const fallbackRestaurants = [
-  { id: "1", name: "Burger Plaza", location: "Barcelona, España", schedule: "13:00 - 00:00", image: "/images/restaurant-1.jpg", featured: true },
-  { id: "2", name: "La Parrilla Gourmet", location: "Madrid, España", schedule: "12:00 - 23:00", image: "/images/restaurant-2.jpg", featured: true },
-  { id: "3", name: "Smash & Co", location: "Valencia, España", schedule: "18:00 - 01:00", image: "/images/restaurant-3.jpg", featured: false },
+  { id: "1", name: "Burger Plaza", location: "Barcelona, España", schedule: "13:00 - 00:00", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/restaurant-1.jpg", featured: true },
+  { id: "2", name: "La Parrilla Gourmet", location: "Madrid, España", schedule: "12:00 - 23:00", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/restaurant-2.jpg", featured: true },
+  { id: "3", name: "Smash & Co", location: "Valencia, España", schedule: "18:00 - 01:00", image: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/restaurant-3.jpg", featured: false },
 ];
 
 const fallbackSponsors = [
-  { id: "1", name: "Sponsor Gold 1", logo: "/images/logo-light.jpeg", tier: "gold" as const },
-  { id: "2", name: "Sponsor Gold 2", logo: "/images/logo-light.jpeg", tier: "gold" as const },
-  { id: "3", name: "Sponsor Silver 1", logo: "/images/logo-light.jpeg", tier: "silver" as const },
-  { id: "4", name: "Sponsor Silver 2", logo: "/images/logo-light.jpeg", tier: "silver" as const },
-  { id: "5", name: "Sponsor Silver 3", logo: "/images/logo-light.jpeg", tier: "silver" as const },
-  { id: "6", name: "Sponsor Bronze 1", logo: "/images/logo-light.jpeg", tier: "bronze" as const },
-  { id: "7", name: "Sponsor Bronze 2", logo: "/images/logo-light.jpeg", tier: "bronze" as const },
+  { id: "1", name: "Sponsor Gold 1", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "gold" as const },
+  { id: "2", name: "Sponsor Gold 2", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "gold" as const },
+  { id: "3", name: "Sponsor Silver 1", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "silver" as const },
+  { id: "4", name: "Sponsor Silver 2", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "silver" as const },
+  { id: "5", name: "Sponsor Silver 3", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "silver" as const },
+  { id: "6", name: "Sponsor Bronze 1", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "bronze" as const },
+  { id: "7", name: "Sponsor Bronze 2", logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: "bronze" as const },
 ];
 
 export default function Home() {
@@ -50,19 +50,19 @@ export default function Home() {
         if (e.items.length) {
           setEvents(e.items.map((x) => ({
             id: x.id, title: x.title, description: x.description ?? "",
-            date: x.event_date ?? "", image: x.image_url ?? "/images/hero-banner.jpeg",
+            date: x.event_date ?? "", image: x.image_url ?? "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg",
           })));
         }
         if (r.items.length) {
           setRestaurants(r.items.map((x) => ({
             id: x.id, name: x.name, location: x.location,
-            schedule: x.schedule ?? "", image: x.logo_url ?? "/images/restaurant-1.jpg", featured: x.featured,
+            schedule: x.schedule ?? "", image: x.logo_url ?? "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/restaurant-1.jpg", featured: x.featured,
           })));
         }
         if (s.items.length) {
           setSponsors(s.items.map((x) => ({
             id: x.id, name: x.company_name,
-            logo: x.logo_url ?? "/images/logo-light.jpeg", tier: x.tier,
+            logo: x.logo_url ?? "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-light.jpg", tier: x.tier,
           })));
         }
       } catch {

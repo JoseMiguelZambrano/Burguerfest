@@ -114,9 +114,9 @@ create policy "profiles self read" on public.profiles
 
 -- ---------- Seed a few events ----------
 insert into public.events (title, description, event_date, image_url, display_order) values
-  ('Burger Fest 2026 - 6ta Edición', 'El festival gastronómico más importante dedicado a la cultura de las hamburguesas regresa con su sexta edición. Más de 50 restaurantes participantes.', '21 - 30 de Junio, 2026', '/images/hero-banner.jpeg', 1),
-  ('Concurso de la Mejor Hamburguesa', 'Los mejores chefs compiten por el título de la mejor hamburguesa del festival. Votación popular y jurado experto.', '25 de Junio, 2026', '/images/hero-banner.jpeg', 2),
-  ('Noche de Food Trucks', 'Una experiencia única con los mejores food trucks de la región. Música en vivo y ambiente festivo.', '28 de Junio, 2026', '/images/hero-banner.jpeg', 3)
+  ('Burger Fest 2026 - 6ta Edición', 'El festival gastronómico más importante dedicado a la cultura de las hamburguesas regresa con su sexta edición. Más de 50 restaurantes participantes.', '21 - 30 de Junio, 2026', 'https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg', 1),
+  ('Concurso de la Mejor Hamburguesa', 'Los mejores chefs compiten por el título de la mejor hamburguesa del festival. Votación popular y jurado experto.', '25 de Junio, 2026', 'https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg', 2),
+  ('Noche de Food Trucks', 'Una experiencia única con los mejores food trucks de la región. Música en vivo y ambiente festivo.', '28 de Junio, 2026', 'https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg', 3)
 on conflict do nothing;
 
 -- ---------- How to create your first admin ----------

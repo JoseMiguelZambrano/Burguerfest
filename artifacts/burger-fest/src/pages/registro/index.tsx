@@ -11,7 +11,7 @@ export default function Registro() {
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-foreground">
               <img
-                src="/images/logo-dark.jpeg"
+                src="https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg"
                 alt="Burger Fest Logo"
                 className="absolute inset-0 w-full h-full object-cover"
               />

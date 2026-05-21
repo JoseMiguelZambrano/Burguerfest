@@ -21,7 +21,7 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <img
-              src="/images/logo-dark.jpeg"
+              src="https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg"
               alt="Burger Fest Logo"
               width={48}
               height={48}

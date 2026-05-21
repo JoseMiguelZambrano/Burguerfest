@@ -12,7 +12,7 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3 mb-4">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                 <img
-                  src="/images/logo-dark.jpeg"
+                  src="https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg"
                   alt="Burger Fest Logo"
                   className="absolute inset-0 w-full h-full object-cover"
                 />

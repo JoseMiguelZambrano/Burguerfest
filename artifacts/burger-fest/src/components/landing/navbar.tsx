@@ -29,7 +29,7 @@ export function LandingNavbar() {
           <Link href="/" className="flex items-center gap-3" aria-label="Burger Fest - Inicio">
             <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-lg overflow-hidden bg-foreground">
               <img
-                src="/images/logo-dark.jpeg"
+                src="https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg"
                 alt="Burger Fest Logo"
                 className="absolute inset-0 w-full h-full object-cover"
               />

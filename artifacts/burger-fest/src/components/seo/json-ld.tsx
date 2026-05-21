@@ -18,7 +18,7 @@ export function JsonLd() {
         addressCountry: "ES",
       },
     },
-    image: ["https://burgerfest.com/images/hero-banner.jpeg"],
+    image: ["https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/hero-banner.jpg"],
     organizer: {
       "@type": "Organization",
       name: "Burger Fest Organization",
@@ -39,7 +39,7 @@ export function JsonLd() {
     "@type": "Organization",
     name: "Burger Fest",
     url: "https://burgerfest.com",
-    logo: "https://burgerfest.com/images/logo-dark.jpeg",
+    logo: "https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg",
     sameAs: [
       "https://instagram.com/burgerfest",
       "https://facebook.com/burgerfest",
