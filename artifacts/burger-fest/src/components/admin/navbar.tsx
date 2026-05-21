@@ -3,9 +3,11 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 
+export type AdminTab = "solicitudes" | "restaurantes" | "patrocinadores" | "participantes";
+
 interface NavbarProps {
-  activeTab: "solicitudes" | "restaurantes" | "participantes";
-  onTabChange: (tab: "solicitudes" | "restaurantes" | "participantes") => void;
+  activeTab: AdminTab;
+  onTabChange: (tab: AdminTab) => void;
 }
 
 export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
@@ -17,6 +19,7 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
   const tabs = [
     { id: "solicitudes" as const, label: "Solicitudes" },
     { id: "restaurantes" as const, label: "Restaurantes" },
+    { id: "patrocinadores" as const, label: "Patrocinadores" },
     { id: "participantes" as const, label: "Participantes" },
   ];
 

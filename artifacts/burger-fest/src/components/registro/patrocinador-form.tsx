@@ -12,6 +12,7 @@ interface FormData {
   nombreEmpresa: string;
   sitioWeb: string;
   contacto: string;
+  telefono: string;
   horarioContacto: string;
   nivel: "gold" | "silver" | "bronze";
 }
@@ -45,7 +46,7 @@ export function RegistroPatrocinadorForm() {
   const { session, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const [formData, setFormData] = useState<FormData>({
-    nombreEmpresa: "", sitioWeb: "", contacto: "", horarioContacto: "", nivel: "gold",
+    nombreEmpresa: "", sitioWeb: "", contacto: "", telefono: "", horarioContacto: "", nivel: "gold",
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -89,13 +90,14 @@ export function RegistroPatrocinadorForm() {
           company_name: formData.nombreEmpresa,
           website: formData.sitioWeb || null,
           contact_name: formData.contacto || null,
+          contact_phone: formData.telefono || null,
           contact_hours: formData.horarioContacto || null,
           logo_url, banner_url,
           tier: formData.nivel,
         },
       });
       setMessage({ kind: "ok", text: "¡Solicitud enviada! Te contactaremos tras la revisión." });
-      setFormData({ nombreEmpresa: "", sitioWeb: "", contacto: "", horarioContacto: "", nivel: "gold" });
+      setFormData({ nombreEmpresa: "", sitioWeb: "", contacto: "", telefono: "", horarioContacto: "", nivel: "gold" });
       setLogoFile(null); setBannerFile(null);
       if (logoPreview) URL.revokeObjectURL(logoPreview);
       if (bannerPreview) URL.revokeObjectURL(bannerPreview);
@@ -139,6 +141,10 @@ export function RegistroPatrocinadorForm() {
             <Input id="contacto" name="contacto" placeholder="Persona de contacto" value={formData.contacto} onChange={handleInputChange} required />
           </div>
           <div className="space-y-2">
+            <FieldLabel htmlFor="telefono">Teléfono (WhatsApp)</FieldLabel>
+            <Input id="telefono" name="telefono" type="tel" placeholder="+58 412 1234567" value={formData.telefono} onChange={handleInputChange} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
             <FieldLabel htmlFor="horarioContacto">Horario de contacto</FieldLabel>
             <Input id="horarioContacto" name="horarioContacto" placeholder="Ej: 9:00 - 18:00" value={formData.horarioContacto} onChange={handleInputChange} />
           </div>

@@ -49,13 +49,26 @@ create table if not exists public.sponsors (
   company_name text not null,
   website text,
   contact_name text,
+  contact_phone text,
   contact_hours text,
   logo_url text,
   banner_url text,
   tier public.sponsor_tier not null default 'bronze',
   status public.submission_status not null default 'pending',
+  accreditation_code text unique,
+  accreditation_used boolean not null default false,
+  accreditation_used_at timestamptz,
   created_at timestamptz default now()
 );
+
+-- Backfill for existing installations
+alter table public.sponsors add column if not exists contact_phone text;
+alter table public.sponsors add column if not exists accreditation_code text;
+alter table public.sponsors add column if not exists accreditation_used boolean not null default false;
+alter table public.sponsors add column if not exists accreditation_used_at timestamptz;
+do $$ begin
+  alter table public.sponsors add constraint sponsors_accreditation_code_key unique (accreditation_code);
+exception when duplicate_table or duplicate_object then null; end $$;
 
 -- ---------- Events ----------
 create table if not exists public.events (

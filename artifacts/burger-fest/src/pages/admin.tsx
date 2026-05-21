@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { AdminNavbar } from "@/components/admin/navbar";
+import { AdminNavbar, type AdminTab } from "@/components/admin/navbar";
 import { RestaurantList, type Restaurant } from "@/components/admin/restaurant-list";
 import { ParticipantList, type Participant } from "@/components/admin/participant-list";
 import { SolicitudesList, type SolicitudRestaurante } from "@/components/admin/solicitudes-list";
+import { SponsorList, type AdminSponsor } from "@/components/admin/sponsor-list";
 import { useAuth } from "@/contexts/auth-context";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -27,10 +28,14 @@ type SponsorRow = {
   id: string;
   company_name: string;
   contact_name: string | null;
+  contact_phone: string | null;
   status: "pending" | "approved" | "rejected";
   tier: "gold" | "silver" | "bronze";
   created_at: string;
   logo_url: string | null;
+  accreditation_code: string | null;
+  accreditation_used: boolean;
+  accreditation_used_at: string | null;
   profiles?: { email?: string | null; display_name?: string | null } | null;
 };
 
@@ -61,7 +66,7 @@ function timeAgo(iso: string): string {
 export default function Admin() {
   const { session, role, loading: authLoading, signOut } = useAuth();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<"solicitudes" | "restaurantes" | "participantes">("solicitudes");
+  const [activeTab, setActiveTab] = useState<AdminTab>("solicitudes");
 
   const [restaurants, setRestaurants] = useState<RestaurantRow[]>([]);
   const [sponsors, setSponsors] = useState<SponsorRow[]>([]);
@@ -202,6 +207,35 @@ export default function Admin() {
     await api(`/admin/restaurants/${id}`, { method: "DELETE" });
     await loadAll();
   }
+  async function deleteSponsor(id: string) {
+    if (!confirm("¿Eliminar este patrocinador?")) return;
+    await api(`/admin/sponsors/${id}`, { method: "DELETE" });
+    await loadAll();
+  }
+  async function generateSponsorCode(id: string): Promise<string> {
+    const res = await api<{ code: string }>(`/admin/sponsors/${id}/accreditation-code`, { method: "POST" });
+    await loadAll();
+    return res.code;
+  }
+  async function updateSponsorPhone(id: string, phone: string) {
+    await api(`/admin/sponsors/${id}`, { method: "PATCH", json: { contact_phone: phone || null } });
+    await loadAll();
+  }
+
+  const sponsorRows: AdminSponsor[] = sponsors.map((s) => ({
+    id: s.id,
+    company_name: s.company_name,
+    contact_name: s.contact_name,
+    contact_phone: s.contact_phone,
+    tier: s.tier,
+    status: s.status,
+    logo_url: s.logo_url,
+    accreditation_code: s.accreditation_code,
+    accreditation_used: s.accreditation_used,
+    accreditation_used_at: s.accreditation_used_at,
+    profile_email: s.profiles?.email ?? null,
+  }));
+
   async function deleteParticipant(id: string) {
     if (!confirm("¿Eliminar este usuario? Esta acción es permanente.")) return;
     await api(`/admin/participants/${id}`, { method: "DELETE" });
@@ -248,6 +282,15 @@ export default function Admin() {
             solicitudes={solicitudes}
             onAprobar={onAprobar}
             onRechazar={onRechazar}
+          />
+        )}
+
+        {!loading && activeTab === "patrocinadores" && (
+          <SponsorList
+            sponsors={sponsorRows}
+            onGenerateCode={generateSponsorCode}
+            onUpdatePhone={updateSponsorPhone}
+            onDelete={deleteSponsor}
           />
         )}
       </main>

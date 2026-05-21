@@ -10,6 +10,8 @@ import Login from "@/pages/login";
 import Registro from "@/pages/registro";
 import RegistroRestaurante from "@/pages/registro/restaurante";
 import RegistroPatrocinador from "@/pages/registro/patrocinador";
+import AcreditacionPage from "@/pages/acreditacion";
+import ScannerPage from "@/pages/scanner";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/registro" component={Registro} />
       <Route path="/registro/restaurante" component={RegistroRestaurante} />
       <Route path="/registro/patrocinador" component={RegistroPatrocinador} />
+      <Route path="/acreditar/:code" component={AcreditacionPage} />
+      <Route path="/scanner" component={ScannerPage} />
       <Route component={NotFound} />
     </Switch>
   );
