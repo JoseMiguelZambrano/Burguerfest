@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, type Role } from "@/contexts/auth-context";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,8 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Login() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, session, role } = useAuth();
   const [, navigate] = useLocation();
+
+  // After a successful sign-in, route based on role
+  useEffect(() => {
+    if (!session) return;
+    if (role === "admin") navigate("/admin");
+    else if (role === "restaurante") navigate("/registro/restaurante");
+    else if (role === "patrocinador") navigate("/registro/patrocinador");
+    else navigate("/");
+  }, [session, role, navigate]);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,18 +35,19 @@ export default function Login() {
     try {
       if (mode === "signin") {
         await signIn(email, password);
-        navigate("/");
+        // Navigation happens automatically via the useEffect above
+        // once session + role are loaded.
       } else {
         await signUp(email, password, role, displayName);
-        // After signup the user may need to confirm email; try immediate sign-in
         try {
           await signIn(email, password);
-          navigate(role === "restaurante" ? "/registro/restaurante" : role === "patrocinador" ? "/registro/patrocinador" : "/admin");
         } catch {
           setError("Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.");
           setMode("signin");
         }
       }
+      // Avoid unused import warning
+      void supabase;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
