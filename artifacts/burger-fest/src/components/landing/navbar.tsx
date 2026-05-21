@@ -27,8 +27,8 @@ export function LandingNavbar() {
         .forEach((k) => localStorage.removeItem(k));
       sessionStorage.clear();
     } catch (_) {}
-    // Hard reload — simplest possible logout
-    window.location.href = "/";
+    // reload() works even inside sandboxed iframes; href navigate may not
+    window.location.reload();
   };
 
   return (

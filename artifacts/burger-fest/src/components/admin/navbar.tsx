@@ -1,6 +1,6 @@
 import { ChevronDown, User, LogOut, Flame } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 
 export type AdminTab = "solicitudes" | "restaurantes" | "patrocinadores" | "participantes";
@@ -12,8 +12,7 @@ interface NavbarProps {
 
 export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { session, signOut } = useAuth();
-  const [, navigate] = useLocation();
+  const { session } = useAuth();
   const email = session?.user?.email ?? "admin";
 
   const tabs = [
@@ -23,7 +22,15 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
     { id: "participantes" as const, label: "Participantes" },
   ];
 
-  const handleLogout = async () => { await signOut(); navigate("/"); };
+  const handleLogout = () => {
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
+        .forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+    } catch (_) {}
+    window.location.reload();
+  };
 
   return (
     <>
