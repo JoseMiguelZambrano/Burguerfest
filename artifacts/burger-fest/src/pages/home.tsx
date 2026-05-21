@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
 import { LandingNavbar } from "@/components/landing/navbar";
 import { HeroCarousel } from "@/components/landing/hero-carousel";
 import { FeaturedRestaurants } from "@/components/landing/featured-restaurants";
@@ -36,6 +38,15 @@ const fallbackSponsors = [
 ];
 
 export default function Home() {
+  const { role, loading: authLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!authLoading && role === "admin") {
+      navigate("/admin", { replace: true });
+    }
+  }, [authLoading, role, navigate]);
+
   const [events, setEvents] = useState(fallbackEvents);
   const [restaurants, setRestaurants] = useState(fallbackRestaurants);
   const [sponsors, setSponsors] = useState(fallbackSponsors);
