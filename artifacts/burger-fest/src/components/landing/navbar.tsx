@@ -87,17 +87,17 @@ export function LandingNavbar() {
                 {session ? (
                   <>
                     {role === "admin" && (
-                      <Button variant="outline" className="border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-ink" asChild>
+                      <Button variant="outline" className="bg-transparent border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-ink" asChild>
                         <Link href="/admin">Admin</Link>
                       </Button>
                     )}
-                    <Button variant="outline" className="border-brand-cream/30 text-brand-cream hover:bg-brand-cream/10" onClick={handleLogout}>
+                    <Button variant="outline" className="bg-transparent border-brand-cream/40 text-brand-cream hover:bg-brand-cream/10 hover:text-brand-cream" onClick={handleLogout}>
                       Cerrar sesión
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" className="border-brand-cream/30 text-brand-cream hover:bg-brand-cream/10" asChild>
+                    <Button variant="outline" className="bg-transparent border-brand-cream/40 text-brand-cream hover:bg-brand-cream/10 hover:text-brand-cream" asChild>
                       <Link href="/registro">Inscríbete</Link>
                     </Button>
                     <Button className="bg-brand-gold text-brand-ink hover:bg-brand-gold/90 font-bold" asChild>
@@ -147,17 +147,17 @@ export function LandingNavbar() {
                 {session ? (
                   <>
                     {role === "admin" && (
-                      <Button variant="outline" className="w-full border-brand-gold text-brand-gold" asChild>
+                      <Button variant="outline" className="w-full bg-transparent border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-ink" asChild>
                         <Link href="/admin">Admin</Link>
                       </Button>
                     )}
-                    <Button variant="outline" className="w-full border-brand-cream/30 text-brand-cream" onClick={handleLogout}>
+                    <Button variant="outline" className="w-full bg-transparent border-brand-cream/40 text-brand-cream hover:bg-brand-cream/10 hover:text-brand-cream" onClick={handleLogout}>
                       Cerrar sesión
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" className="w-full border-brand-cream/30 text-brand-cream" asChild>
+                    <Button variant="outline" className="w-full bg-transparent border-brand-cream/40 text-brand-cream hover:bg-brand-cream/10 hover:text-brand-cream" asChild>
                       <Link href="/registro">Inscríbete</Link>
                     </Button>
                     <Button className="w-full bg-brand-gold text-brand-ink hover:bg-brand-gold/90 font-bold" asChild>
