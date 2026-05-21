@@ -18,9 +18,18 @@ const navItems: NavItem[] = [
 
 export function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { session, role, signOut } = useAuth();
-  const [, navigate] = useLocation();
-  const handleLogout = async () => { await signOut(); navigate("/"); };
+  const { session, role } = useAuth();
+  const handleLogout = () => {
+    // Wipe Supabase tokens directly from storage
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
+        .forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+    } catch (_) {}
+    // Hard reload — simplest possible logout
+    window.location.href = "/";
+  };
 
   return (
     <>
