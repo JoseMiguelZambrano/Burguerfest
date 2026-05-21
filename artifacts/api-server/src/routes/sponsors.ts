@@ -25,6 +25,47 @@ function getScannerPin(): string {
   return (process.env.SCANNER_PIN ?? "").trim();
 }
 
+// ── Simple in-memory rate limiter for PIN attempts (per IP) ──
+type Attempt = { count: number; firstAt: number; lockedUntil: number };
+const pinAttempts = new Map<string, Attempt>();
+const PIN_WINDOW_MS = 5 * 60_000;   // 5 minutes
+const PIN_MAX = 8;                  // attempts per window
+const PIN_LOCK_MS = 10 * 60_000;    // 10 minute lockout
+
+function clientIp(req: { ip?: string; headers: Record<string, unknown> }): string {
+  const fwd = req.headers["x-forwarded-for"];
+  if (typeof fwd === "string" && fwd.length > 0) return fwd.split(",")[0]!.trim();
+  return req.ip ?? "unknown";
+}
+
+function checkPinLock(ip: string): { locked: boolean; retryInSec?: number } {
+  const a = pinAttempts.get(ip);
+  if (!a) return { locked: false };
+  const now = Date.now();
+  if (a.lockedUntil > now) {
+    return { locked: true, retryInSec: Math.ceil((a.lockedUntil - now) / 1000) };
+  }
+  if (now - a.firstAt > PIN_WINDOW_MS) {
+    pinAttempts.delete(ip);
+  }
+  return { locked: false };
+}
+
+function registerPinFailure(ip: string) {
+  const now = Date.now();
+  const a = pinAttempts.get(ip);
+  if (!a || now - a.firstAt > PIN_WINDOW_MS) {
+    pinAttempts.set(ip, { count: 1, firstAt: now, lockedUntil: 0 });
+    return;
+  }
+  a.count += 1;
+  if (a.count >= PIN_MAX) a.lockedUntil = now + PIN_LOCK_MS;
+}
+
+function clearPinFailures(ip: string) {
+  pinAttempts.delete(ip);
+}
+
 router.get("/sponsors", async (_req, res) => {
   const { data, error } = await supabaseAdmin
     .from("sponsors")
@@ -65,7 +106,7 @@ router.post(
   async (req, res) => {
     const parsed = SponsorInput.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+      return res.status(400).json({ error: "Datos inválidos", details: parsed.error.flatten() });
     }
     const { data, error } = await supabaseAdmin
       .from("sponsors")
@@ -102,7 +143,7 @@ router.patch(
       contact_phone: z.string().optional().nullable(),
     });
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) return res.status(400).json({ error: "Datos inválidos" });
     const { data, error } = await supabaseAdmin
       .from("sponsors")
       .update(parsed.data)
@@ -140,33 +181,32 @@ router.post(
       .eq("id", req.params.id)
       .maybeSingle();
     if (e1) return res.status(500).json({ error: e1.message });
-    if (!sponsor) return res.status(404).json({ error: "Sponsor not found" });
+    if (!sponsor) return res.status(404).json({ error: "Patrocinador no encontrado" });
     if (sponsor.status !== "approved") {
       return res.status(400).json({ error: "El patrocinador debe estar aprobado" });
     }
 
-    // Try a few times in case of unique collision
-    let code = sponsor.accreditation_code as string | null;
-    if (!code) {
-      for (let i = 0; i < 5; i++) {
-        const candidate = genCode();
-        const { data: upd, error: e2 } = await supabaseAdmin
-          .from("sponsors")
-          .update({
-            accreditation_code: candidate,
-            accreditation_used: false,
-            accreditation_used_at: null,
-          })
-          .eq("id", req.params.id)
-          .select("accreditation_code")
-          .single();
-        if (!e2 && upd?.accreditation_code) {
-          code = upd.accreditation_code;
-          break;
-        }
+    // Always (re)generate when this endpoint is called — UI contract is rotation.
+    // Retry a few times in case of unique collision.
+    let code: string | null = null;
+    for (let i = 0; i < 5; i++) {
+      const candidate = genCode();
+      const { data: upd, error: e2 } = await supabaseAdmin
+        .from("sponsors")
+        .update({
+          accreditation_code: candidate,
+          accreditation_used: false,
+          accreditation_used_at: null,
+        })
+        .eq("id", req.params.id)
+        .select("accreditation_code")
+        .single();
+      if (!e2 && upd?.accreditation_code) {
+        code = upd.accreditation_code;
+        break;
       }
-      if (!code) return res.status(500).json({ error: "No se pudo generar código" });
     }
+    if (!code) return res.status(500).json({ error: "No se pudo generar código" });
     res.json({ code });
   },
 );
@@ -178,6 +218,12 @@ const ScanInput = z.object({
 });
 
 router.post("/scan", async (req, res) => {
+  const ip = clientIp(req);
+  const lock = checkPinLock(ip);
+  if (lock.locked) {
+    return res.status(429).json({ error: `Demasiados intentos. Vuelve a intentar en ${lock.retryInSec}s` });
+  }
+
   const parsed = ScanInput.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Datos inválidos" });
 
@@ -186,60 +232,75 @@ router.post("/scan", async (req, res) => {
     return res.status(503).json({ error: "Scanner no configurado (falta SCANNER_PIN)" });
   }
   if (parsed.data.pin !== expected) {
+    registerPinFailure(ip);
     return res.status(401).json({ error: "PIN incorrecto" });
   }
+  clearPinFailures(ip);
 
-  const { data: sponsor, error } = await supabaseAdmin
+  const code = parsed.data.code.trim();
+  const now = new Date().toISOString();
+
+  // Atomic claim: only succeeds if approved AND not yet used.
+  const { data: claimed, error: claimErr } = await supabaseAdmin
     .from("sponsors")
-    .select("id, company_name, contact_name, tier, status, accreditation_used, accreditation_used_at")
-    .eq("accreditation_code", parsed.data.code.trim())
+    .update({ accreditation_used: true, accreditation_used_at: now })
+    .eq("accreditation_code", code)
+    .eq("status", "approved")
+    .eq("accreditation_used", false)
+    .select("company_name, contact_name, tier")
     .maybeSingle();
 
-  if (error) return res.status(500).json({ error: error.message });
-  if (!sponsor) {
-    return res.status(404).json({ status: "invalid", error: "Código no válido" });
-  }
-  if (sponsor.status !== "approved") {
-    return res.status(403).json({ status: "invalid", error: "Patrocinador no aprobado" });
-  }
+  if (claimErr) return res.status(500).json({ error: claimErr.message });
 
-  if (sponsor.accreditation_used) {
+  if (claimed) {
     return res.json({
-      status: "already_used",
+      status: "valid",
       sponsor: {
-        company_name: sponsor.company_name,
-        contact_name: sponsor.contact_name,
-        tier: sponsor.tier,
-        used_at: sponsor.accreditation_used_at,
+        company_name: claimed.company_name,
+        contact_name: claimed.contact_name,
+        tier: claimed.tier,
+        used_at: now,
       },
     });
   }
 
-  const now = new Date().toISOString();
-  const { error: updErr } = await supabaseAdmin
+  // Claim failed — figure out why for a helpful message.
+  const { data: existing, error: lookupErr } = await supabaseAdmin
     .from("sponsors")
-    .update({ accreditation_used: true, accreditation_used_at: now })
-    .eq("id", sponsor.id);
-  if (updErr) return res.status(500).json({ error: updErr.message });
+    .select("company_name, contact_name, tier, status, accreditation_used, accreditation_used_at")
+    .eq("accreditation_code", code)
+    .maybeSingle();
 
-  res.json({
-    status: "valid",
+  if (lookupErr) return res.status(500).json({ error: lookupErr.message });
+  if (!existing) return res.status(404).json({ status: "invalid", error: "Código no válido" });
+  if (existing.status !== "approved") {
+    return res.status(403).json({ status: "invalid", error: "Patrocinador no aprobado" });
+  }
+  return res.json({
+    status: "already_used",
     sponsor: {
-      company_name: sponsor.company_name,
-      contact_name: sponsor.contact_name,
-      tier: sponsor.tier,
-      used_at: now,
+      company_name: existing.company_name,
+      contact_name: existing.contact_name,
+      tier: existing.tier,
+      used_at: existing.accreditation_used_at,
     },
   });
 });
 
 // PIN verification only (used to unlock scanner UI without scanning)
 router.post("/scan/verify-pin", (req, res) => {
+  const ip = clientIp(req);
+  const lock = checkPinLock(ip);
+  if (lock.locked) {
+    return res.status(429).json({ error: `Demasiados intentos. Vuelve a intentar en ${lock.retryInSec}s` });
+  }
   const expected = getScannerPin();
   if (!expected) return res.status(503).json({ error: "Scanner no configurado" });
   if ((req.body?.pin ?? "") !== expected) {
+    registerPinFailure(ip);
     return res.status(401).json({ error: "PIN incorrecto" });
   }
+  clearPinFailures(ip);
   res.json({ ok: true });
 });
 
