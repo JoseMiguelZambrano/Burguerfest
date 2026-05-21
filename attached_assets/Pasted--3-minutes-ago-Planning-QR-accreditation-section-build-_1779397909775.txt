@@ -1,0 +1,229 @@
+
+3 minutes ago
+
+Planning QR accreditation section build (5 seconds)
+Voy a leer todos los archivos relevantes de la sección QR para darte unas instrucciones completas y precisas.
+
+
+4 actions
+Necesito leer los archivos que faltan — la página de acreditación del patrocinador y el tab de patrocinadores del admin.
+
+
+12 actions
+Tengo todo lo que necesito. Aquí van las instrucciones completas:
+
+Sistema QR de Acreditación — Burger Fest 2026
+Instrucciones completas para replicar
+Visión general del sistema
+El sistema tiene 3 piezas que trabajan juntas:
+
+/acreditar/:code — Página del patrocinador. Muestra su QR para presentar en entrada.
+/scanner — App del personal de entrada. Escanea QR con cámara, valida el código.
+Admin → tab "Patrocinadores" — Panel interno. Genera el QR de cada patrocinador y lo envía por WhatsApp.
+Dependencias a instalar
+pnpm add html5-qrcode qrcode.react
+
+html5-qrcode — acceso a cámara + lectura de QR en el navegador
+qrcode.react — genera imágenes QR como SVG
+Archivo de datos estáticos
+src/data/sponsors-accreditation.ts
+
+Este archivo centraliza los datos de patrocinadores acreditados. Mientras no haya base de datos, todo se lee de aquí. Cuando llegue Supabase, se reemplaza por llamadas a la API.
+
+export type SponsorTier = "Gold" | "Silver" | "Bronze";
+export interface AccreditedSponsor {
+  code: string;        // Identificador único: formato "BF26-xxxxxxxx"
+  company: string;     // Nombre de la empresa
+  contact: string;     // Nombre del contacto
+  tier: SponsorTier;   // Nivel de patrocinio
+  used: boolean;       // Si ya fue escaneado en entrada
+  phone?: string;      // Teléfono WhatsApp (opcional)
+}
+export const ACCREDITED_SPONSORS: AccreditedSponsor[] = [
+  {
+    code: "BF26-a3f9b2c1",
+    company: "TechCorp España S.A.",
+    contact: "María González",
+    tier: "Gold",
+    used: false,
+    phone: "+34612345678",
+  },
+  {
+    code: "BF26-d7e1f4a8",
+    company: "Bebidas Premium SL",
+    contact: "Carlos Martínez",
+    tier: "Gold",
+    used: false,
+    phone: "+34698765432",
+  },
+  {
+    code: "BF26-c2b5a9f3",
+    company: "Distribuciones Norte",
+    contact: "Ana Rodríguez",
+    tier: "Silver",
+    used: false,
+    // sin teléfono — el admin deberá introducirlo manualmente al enviar
+  },
+  {
+    code: "BF26-f6d3e7b2",
+    company: "Medios & Comunicación",
+    contact: "Pedro López",
+    tier: "Silver",
+    used: false,
+    phone: "+34677001122",
+  },
+  {
+    code: "BF26-b1a4c8e5",
+    company: "Logística Express",
+    contact: "Laura Sánchez",
+    tier: "Bronze",
+    used: false,
+  },
+];
+export const SCANNER_PIN = "1234"; // Cambiar antes de producción
+export function findSponsorByCode(code: string): AccreditedSponsor | null {
+  return ACCREDITED_SPONSORS.find((s) => s.code === code.trim()) ?? null;
+}
+
+Pieza 1 — Página de acreditación del patrocinador
+Ruta: /acreditar/:code
+Archivo: src/pages/AcreditacionPage.tsx
+
+Qué hace: El patrocinador recibe un link por WhatsApp. Al abrirlo ve esta página con su nombre, nivel, y un QR grande para mostrar al personal de entrada.
+
+Diseño: Fondo oscuro #0f1117, tarjeta blanca centrada con el QR dentro, logo del evento arriba, instrucciones abajo.
+
+import { useParams } from "wouter";
+import { QRCodeSVG } from "qrcode.react";
+import { CheckCircle, XCircle } from "lucide-react";
+import { findSponsorByCode } from "@/data/sponsors-accreditation";
+// Colores por nivel de patrocinio
+const tierColors: Record<string, string> = {
+  Gold: "bg-yellow-400 text-yellow-900",
+  Silver: "bg-slate-300 text-slate-800",
+  Bronze: "bg-amber-700 text-amber-100",
+};
+export default function AcreditacionPage() {
+  const { code } = useParams<{ code: string }>();
+  const sponsor = code ? findSponsorByCode(code) : null;
+  // Estado de error: código inválido o no encontrado
+  if (!sponsor) {
+    return (
+      <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center px-6 text-center gap-6">
+        <XCircle className="w-20 h-20 text-red-400" strokeWidth={1.5} />
+        <div>
+          <h1 className="text-2xl font-bold text-white">Código no válido</h1>
+          <p className="text-white/40 text-sm mt-2">
+            Este enlace de acreditación no existe o ha expirado.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center px-6 py-12">
+      <div className="w-full max-w-sm flex flex-col items-center gap-8">
+        {/* Cabecera con logo */}
+        <div className="flex flex-col items-center gap-3 text-center">
+          <img
+            src="/images/logo-dark.jpeg"
+            alt="Burger Fest"
+            className="w-16 h-16 rounded-2xl object-cover"
+          />
+          <h1 className="text-2xl font-bold text-white tracking-tight">Burger Fest 2026</h1>
+          <p className="text-white/40 text-sm">Credencial de patrocinador</p>
+        </div>
+        {/* Tarjeta blanca con QR */}
+        <div className="w-full bg-white rounded-3xl p-8 flex flex-col items-center gap-6 shadow-2xl">
+          {/* Datos del patrocinador */}
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-xl font-bold text-gray-900">{sponsor.company}</p>
+            <p className="text-sm text-gray-500">{sponsor.contact}</p>
+            <span className={`mt-2 inline-block px-4 py-1 rounded-full text-xs font-bold ${tierColors[sponsor.tier]}`}>
+              Patrocinador {sponsor.tier}
+            </span>
+          </div>
+          {/* El QR — su valor es el código (ej: "BF26-a3f9b2c1") */}
+          <QRCodeSVG
+            value={sponsor.code}
+            size={200}
+            level="H"        // Máxima corrección de errores
+            includeMargin    // Margen blanco alrededor
+          />
+          {/* Código en texto plano debajo del QR */}
+          <div className="w-full bg-gray-50 rounded-xl px-4 py-3 text-center border border-gray-100">
+            <p className="text-xs text-gray-400 font-mono break-all">{sponsor.code}</p>
+          </div>
+        </div>
+        {/* Instrucciones */}
+        <div className="flex flex-col items-center gap-2 text-center">
+          <CheckCircle className="w-5 h-5 text-green-400" />
+          <p className="text-white/60 text-sm">
+            Muestra este QR al personal de entrada del evento.
+          </p>
+          <p className="text-white/30 text-xs mt-1">
+            Burger Fest · 21–30 de Junio, 2026
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Pieza 2 — Escáner QR para personal de entrada
+Ruta: /scanner
+Archivo: src/pages/ScannerPage.tsx
+
+Qué hace: Pantalla de PIN → pantalla de escáner con cámara → pantalla de resultado (verde/rojo). Vuelve automáticamente al escáner tras 5 segundos.
+
+Diseño: Todo fondo oscuro #0f1117. Sin navbar ni footer — es una app de uso interno a pantalla completa. La pantalla de resultado es completamente verde (bg-green-950) o roja (bg-red-950) según el resultado.
+
+El componente tiene 3 pantallas separadas que se van intercambiando:
+
+import { useState, useEffect, useRef } from "react";
+import { Html5Qrcode } from "html5-qrcode";
+import { CheckCircle, XCircle, ScanLine, RotateCcw, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  findSponsorByCode,
+  SCANNER_PIN,
+  type AccreditedSponsor,
+} from "@/data/sponsors-accreditation";
+type ScanResult =
+  | { status: "valid"; sponsor: AccreditedSponsor }
+  | { status: "invalid" }
+  | null;
+// ─── PANTALLA 1: PIN de acceso ────────────────────────────────────────────────
+function PinScreen({ onUnlock }: { onUnlock: () => void }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState(false);
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (pin === SCANNER_PIN) {
+      onUnlock();
+    } else {
+      setError(true);
+      setPin("");
+      setTimeout(() => setError(false), 2000);
+    }
+  }
+  return (
+    <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center px-6">
+      <div className="w-full max-w-xs flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <Lock className="w-7 h-7 text-white/60" />
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Burger Fest</h1>
+          <p className="text-sm text-white/40 text-center">Acceso para personal de entrada</p>
+        </div>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+          <Input
+            type="password"
+            inputMode="numeric"
+            placeholder="PIN de acceso"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            maxLength={8}
+            className={`text-center text-xl tracking-widest bg-white/5 border-white/10 text-white placeholder:text-white/
