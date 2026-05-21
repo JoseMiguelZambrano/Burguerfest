@@ -60,7 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Local scope: clears tokens immediately without a network round-trip,
+    // so the UI updates even if Supabase is unreachable.
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (err) {
+      console.warn("signOut error (ignored):", err);
+    }
+    setSession(null);
     setRole(null);
   };
 
