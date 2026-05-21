@@ -20,14 +20,10 @@ export function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { session, role } = useAuth();
   const handleLogout = () => {
-    // Wipe Supabase tokens directly from storage
     try {
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
-        .forEach((k) => localStorage.removeItem(k));
+      localStorage.removeItem("bf-auth");
       sessionStorage.clear();
     } catch (_) {}
-    // reload() works even inside sandboxed iframes; href navigate may not
     window.location.reload();
   };
 

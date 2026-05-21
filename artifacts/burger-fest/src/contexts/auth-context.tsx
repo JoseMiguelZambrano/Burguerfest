@@ -66,14 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.warn("signOut error (ignored):", err);
     }
-    // 2) Force-clear any Supabase tokens from local/session storage
+    // 2) Remove the custom storageKey used by this Supabase client ("bf-auth")
     try {
-      const keys: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith("sb-") || k.includes("supabase"))) keys.push(k);
-      }
-      keys.forEach((k) => localStorage.removeItem(k));
+      localStorage.removeItem("bf-auth");
       sessionStorage.clear();
     } catch (err) {
       console.warn("storage clear failed:", err);

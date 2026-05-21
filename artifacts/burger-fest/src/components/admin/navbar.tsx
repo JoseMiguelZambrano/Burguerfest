@@ -24,9 +24,7 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
 
   const handleLogout = () => {
     try {
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
-        .forEach((k) => localStorage.removeItem(k));
+      localStorage.removeItem("bf-auth");
       sessionStorage.clear();
     } catch (_) {}
     window.location.reload();
