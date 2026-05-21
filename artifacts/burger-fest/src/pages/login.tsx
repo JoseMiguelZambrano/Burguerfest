@@ -9,22 +9,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Login() {
-  const { signIn, signUp, session, role } = useAuth();
+  const { signIn, signUp, session, role: currentRole } = useAuth();
   const [, navigate] = useLocation();
 
   // After a successful sign-in, route based on role
   useEffect(() => {
     if (!session) return;
-    if (role === "admin") navigate("/admin");
-    else if (role === "restaurante") navigate("/registro/restaurante");
-    else if (role === "patrocinador") navigate("/registro/patrocinador");
+    if (currentRole === "admin") navigate("/admin");
+    else if (currentRole === "restaurante") navigate("/registro/restaurante");
+    else if (currentRole === "patrocinador") navigate("/registro/patrocinador");
     else navigate("/");
-  }, [session, role, navigate]);
+  }, [session, currentRole, navigate]);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<Role>("restaurante");
+  const [signupRole, setSignupRole] = useState<Role>("restaurante");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,7 @@ export default function Login() {
         // Navigation happens automatically via the useEffect above
         // once session + role are loaded.
       } else {
-        await signUp(email, password, role, displayName);
+        await signUp(email, password, signupRole, displayName);
         try {
           await signIn(email, password);
         } catch {
@@ -83,7 +83,7 @@ export default function Login() {
             {mode === "signup" && (
               <div className="space-y-2">
                 <Label>Tipo de cuenta</Label>
-                <RadioGroup value={role} onValueChange={(v) => setRole(v as Role)} className="grid grid-cols-1 gap-2">
+                <RadioGroup value={signupRole} onValueChange={(v) => setSignupRole(v as Role)} className="grid grid-cols-1 gap-2">
                   <label className="flex items-center gap-3 p-3 rounded-md border cursor-pointer">
                     <RadioGroupItem value="restaurante" id="role-r" />
                     <span>Restaurante</span>
