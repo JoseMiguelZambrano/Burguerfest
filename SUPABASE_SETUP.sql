@@ -69,16 +69,28 @@ create table if not exists public.events (
 );
 
 -- ---------- Auto-create profile on signup ----------
+-- SECURITY: only allow non-privileged roles to come from client metadata.
+-- Admin role must be granted manually via SQL by an existing admin:
+--   update public.profiles set role = 'admin' where email = '...';
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public
 as $$
+declare
+  requested_role text := new.raw_user_meta_data->>'role';
+  safe_role public.user_role;
 begin
+  if requested_role in ('restaurante', 'patrocinador') then
+    safe_role := requested_role::public.user_role;
+  else
+    safe_role := 'restaurante';
+  end if;
+
   insert into public.profiles (id, email, display_name, role)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'display_name', new.email),
-    coalesce((new.raw_user_meta_data->>'role')::public.user_role, 'restaurante')
+    safe_role
   );
   return new;
 end;
