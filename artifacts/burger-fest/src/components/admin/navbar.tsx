@@ -30,10 +30,27 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
     window.location.assign("/");
   };
 
+  const TabButton = ({ tab }: { tab: (typeof tabs)[number] }) => (
+    <button
+      key={tab.id}
+      onClick={() => onTabChange(tab.id)}
+      className={`
+        whitespace-nowrap px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-md transition-all
+        ${
+          activeTab === tab.id
+            ? "bg-brand-gold text-brand-ink shadow-md"
+            : "text-brand-cream/70 hover:text-brand-cream hover:bg-brand-cream/10"
+        }
+      `}
+    >
+      {tab.label}
+    </button>
+  );
+
   return (
     <>
       <div className="bg-brand-ink text-brand-cream">
-        <div className="w-full px-6 lg:px-8 h-9 flex items-center justify-between text-xs">
+        <div className="w-full px-4 lg:px-8 h-9 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <Flame className="w-3.5 h-3.5 text-brand-gold" />
             <span className="font-medium tracking-wide uppercase">Panel de Administración</span>
@@ -43,10 +60,11 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
       </div>
 
       <header className="w-full bg-brand-maroon-deep shadow-lg border-b border-brand-maroon">
-        <div className="w-full px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-brand-gold/60 bg-brand-ink">
+        <div className="w-full px-4 lg:px-8">
+          {/* Main row: logo + desktop tabs + user */}
+          <div className="flex items-center justify-between h-14 lg:h-16">
+            <Link href="/" className="flex items-center gap-3 shrink-0">
+              <div className="relative w-10 h-10 lg:w-11 lg:h-11 rounded-full overflow-hidden ring-2 ring-brand-gold/60 bg-brand-ink">
                 <img
                   src="https://res.cloudinary.com/ddqarpruz/image/upload/v1779351381/burger-fest/seed/logo-dark.jpg"
                   alt="Burger Fest Logo"
@@ -54,36 +72,24 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
                 />
               </div>
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="font-display text-xl text-brand-cream tracking-wide">Burger Fest</span>
+                <span className="font-display text-lg lg:text-xl text-brand-cream tracking-wide">Burger Fest</span>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-brand-gold">Admin</span>
               </div>
             </Link>
 
-            <nav className="flex items-center gap-1">
+            {/* Desktop tabs — hidden on mobile */}
+            <nav className="hidden lg:flex items-center gap-1">
               {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
-                  className={`
-                    px-4 lg:px-5 py-2 text-xs lg:text-sm font-semibold uppercase tracking-wider rounded-md transition-all
-                    ${
-                      activeTab === tab.id
-                        ? "bg-brand-gold text-brand-ink shadow-md"
-                        : "text-brand-cream/70 hover:text-brand-cream hover:bg-brand-cream/10"
-                    }
-                  `}
-                >
-                  {tab.label}
-                </button>
+                <TabButton key={tab.id} tab={tab} />
               ))}
             </nav>
 
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-3 text-brand-cream/90 hover:text-brand-gold transition-colors"
+                className="flex items-center gap-2 text-brand-cream/90 hover:text-brand-gold transition-colors"
               >
-                <span className="text-sm font-medium hidden md:block max-w-[160px] truncate">{email}</span>
+                <span className="text-sm font-medium hidden md:block max-w-[140px] truncate">{email}</span>
                 <div className="w-9 h-9 rounded-full bg-brand-cream/15 border border-brand-gold/40 flex items-center justify-center">
                   <User className="w-5 h-5" />
                 </div>
@@ -105,6 +111,15 @@ export function AdminNavbar({ activeTab, onTabChange }: NavbarProps) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Mobile tabs row — scrollable, hidden on desktop */}
+          <div className="lg:hidden overflow-x-auto pb-2 -mx-4 px-4 border-t border-brand-maroon/30">
+            <nav className="flex items-center gap-1 min-w-max py-2">
+              {tabs.map((tab) => (
+                <TabButton key={tab.id} tab={tab} />
+              ))}
+            </nav>
           </div>
         </div>
       </header>

@@ -81,7 +81,7 @@ export default function Login() {
                 />
               </div>
             </Link>
-            <h1 className="font-display text-5xl text-brand-ink leading-none mb-2">
+            <h1 className="font-display text-4xl sm:text-5xl text-brand-ink leading-none mb-2">
               {mode === "signin" ? "Bienvenido" : "Únete al fuego"}
             </h1>
             <div className="w-14 h-1 bg-brand-flame mx-auto mb-3" />

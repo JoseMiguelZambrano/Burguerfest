@@ -56,8 +56,8 @@ export function LandingNavbar() {
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
-              <div className="hidden sm:flex flex-col leading-none">
-                <span className="font-display text-2xl lg:text-3xl text-brand-cream tracking-wide">
+              <div className="hidden lg:flex flex-col leading-none">
+                <span className="font-display text-2xl lg:text-3xl text-brand-cream tracking-wide whitespace-nowrap">
                   Burger Fest
                 </span>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-brand-gold">
@@ -66,8 +66,8 @@ export function LandingNavbar() {
               </div>
             </Link>
 
-            <div className="hidden md:flex items-center gap-8">
-              <ul className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-4 lg:gap-8">
+              <ul className="flex items-center gap-3 lg:gap-6">
                 {navItems.map((item) => (
                   <li key={item.href}>
                     {item.href.startsWith("#") ? (

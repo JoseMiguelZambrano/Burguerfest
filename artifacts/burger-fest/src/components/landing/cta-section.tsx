@@ -17,7 +17,7 @@ export function CTASection() {
         </div>
         <h2
           id="cta-heading"
-          className="font-display text-5xl lg:text-7xl text-brand-cream mb-5 leading-[0.95]"
+          className="font-display text-4xl sm:text-5xl lg:text-7xl text-brand-cream mb-5 leading-[0.95]"
         >
           ¿Listo para <span className="text-brand-gold">prender la parrilla</span>?
         </h2>

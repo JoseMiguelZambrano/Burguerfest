@@ -37,7 +37,7 @@ export function Sponsors({ sponsors }: SponsorsProps) {
           </div>
           <h2
             id="patrocinadores-heading"
-            className="font-display text-5xl lg:text-6xl text-brand-cream leading-none mb-3"
+            className="font-display text-4xl sm:text-5xl lg:text-6xl text-brand-cream leading-none mb-3"
           >
             Quienes hacen posible <span className="text-brand-gold">el fuego</span>
           </h2>

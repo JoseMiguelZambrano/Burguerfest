@@ -246,7 +246,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background bg-grain">
       <AdminNavbar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="w-full px-6 lg:px-8 py-10">
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {error && (
           <div className="max-w-7xl mx-auto mb-4 p-4 rounded-xl bg-brand-flame/10 border border-brand-flame/30 text-brand-flame text-sm">
             {error}

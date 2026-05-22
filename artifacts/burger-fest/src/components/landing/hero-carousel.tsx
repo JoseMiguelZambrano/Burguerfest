@@ -69,7 +69,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
                     <Flame className="w-3.5 h-3.5" />
                     {event.date}
                   </div>
-                  <h2 className="font-display text-5xl sm:text-6xl lg:text-8xl text-brand-cream mb-4 leading-[0.95] tracking-tight">
+                  <h2 className="font-display text-4xl sm:text-5xl lg:text-8xl text-brand-cream mb-4 leading-[0.95] tracking-tight">
                     {event.title}
                   </h2>
                   <div className="w-20 h-1 bg-brand-flame mb-5" />

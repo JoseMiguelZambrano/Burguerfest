@@ -29,7 +29,7 @@ export function FeaturedRestaurants({ restaurants }: FeaturedRestaurantsProps) {
             </div>
             <h2
               id="restaurantes-heading"
-              className="font-display text-5xl lg:text-6xl text-brand-ink leading-none"
+              className="font-display text-4xl sm:text-5xl lg:text-6xl text-brand-ink leading-none"
             >
               Los reyes <span className="text-brand-flame">de la parrilla</span>
             </h2>
